@@ -1,0 +1,1891 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0d9488">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="VinylVault">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon.svg">
+    
+    <title>Vinyl Vault - LP Tracker</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        :root {
+            --bg-main: #f0f7f7;
+            --bg-card: #ffffff;
+            --bg-card-subtle: #f4faf8;
+            --bg-surface: #e6f4f1;
+            
+            --primary: #0d9488;          /* Teal / Seafoam Deep */
+            --primary-light: #2dd4bf;    /* Mint / Aqua Bright */
+            --primary-pale: #ccfbf1;     /* Pale Mint */
+            --primary-gradient: linear-gradient(135deg, #0d9488 0%, #0284c7 100%);
+            --accent-blue: #0284c7;      /* Sky Blue */
+            --accent-blue-light: #38bdf8;
+            --accent-blue-pale: #e0f2fe;
+            --accent-green: #10b981;     /* Emerald Green */
+            --accent-green-pale: #d1fae5;
+            
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --text-light: #94a3b8;
+            
+            --border-color: #d1e7e2;
+            
+            --shadow-sm: 0 1px 3px rgba(13, 148, 136, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 6px -1px rgba(13, 148, 136, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 10px 15px -3px rgba(13, 148, 136, 0.12), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(13, 148, 136, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+            
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 18px;
+            --radius-full: 9999px;
+            
+            --font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            padding: 0.75rem 1.25rem;
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: var(--text-main);
+        }
+
+        .brand-icon-wrap {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 4px 10px rgba(13, 148, 136, 0.3);
+        }
+
+        .brand-title {
+            font-family: var(--font-heading);
+            font-size: 1.35rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .brand-badge {
+            font-size: 0.7rem;
+            font-weight: 600;
+            background: var(--accent-green-pale);
+            color: var(--accent-green);
+            padding: 2px 8px;
+            border-radius: var(--radius-full);
+            text-transform: uppercase;
+        }
+
+        .nav-actions { display: flex; align-items: center; gap: 0.6rem; }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.45rem;
+            font-family: var(--font-body);
+            font-weight: 600;
+            font-size: 0.88rem;
+            padding: 0.55rem 1rem;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: none;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 2px 6px rgba(13, 148, 136, 0.25);
+        }
+        .btn-primary:hover { box-shadow: 0 4px 12px rgba(13, 148, 136, 0.35); transform: translateY(-1px); }
+
+        .btn-secondary { background: white; color: var(--primary); border: 1px solid var(--border-color); }
+        .btn-secondary:hover { background: var(--bg-surface); border-color: var(--primary-light); }
+
+        .btn-accent { background: var(--accent-blue-pale); color: var(--accent-blue); border: 1px solid rgba(2, 132, 199, 0.2); }
+        .btn-accent:hover { background: var(--accent-blue); color: white; }
+
+        .btn-danger { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
+        .btn-danger:hover { background: #dc2626; color: white; }
+
+        .btn-icon-only { padding: 0.55rem; border-radius: var(--radius-md); }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.25rem;
+            flex: 1;
+            width: 100%;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 0.85rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+        }
+
+        .stat-icon.teal { background: var(--primary-pale); color: var(--primary); }
+        .stat-icon.green { background: var(--accent-green-pale); color: var(--accent-green); }
+        .stat-icon.blue { background: var(--accent-blue-pale); color: var(--accent-blue); }
+        .stat-icon.mint { background: #ecfdf5; color: #059669; }
+
+        .stat-content .stat-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-content .stat-value {
+            font-family: var(--font-heading);
+            font-size: 1.45rem;
+            font-weight: 700;
+            color: var(--text-main);
+            line-height: 1.2;
+        }
+
+        /* Turntable Player */
+        .player-banner {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            border-radius: var(--radius-lg);
+            padding: 1.1rem 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid #334155;
+            position: relative;
+        }
+
+        .player-banner::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 5px;
+            background: var(--primary-gradient);
+            border-radius: 4px 0 0 4px;
+        }
+
+        .turntable-preview { display: flex; align-items: center; gap: 1.25rem; }
+
+        .spinning-vinyl {
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #2d3748 0%, #1a202c 60%, #000000 100%);
+            border: 2px solid #4a5568;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+            animation: spinVinyl 3.5s linear infinite;
+        }
+
+        .spinning-vinyl.paused { animation-play-state: paused; }
+
+        .spinning-vinyl .label-art {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid white;
+        }
+
+        /* Controls */
+        .controls-bar {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 0.85rem 1.1rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .search-row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+
+        .search-input-wrap {
+            position: relative;
+            flex: 1;
+            min-width: 240px;
+        }
+
+        .search-input-wrap svg {
+            position: absolute;
+            left: 0.85rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            pointer-events: none;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.55rem 0.85rem 0.55rem 2.4rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            font-family: var(--font-body);
+            background: var(--bg-card-subtle);
+            outline: none;
+        }
+        .search-input:focus { border-color: var(--primary); background: white; }
+
+        .filter-row { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; font-size: 0.82rem; }
+
+        .select-custom {
+            padding: 0.45rem 1.8rem 0.45rem 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background-color: var(--bg-card-subtle);
+            color: var(--text-main);
+            font-size: 0.82rem;
+            font-weight: 500;
+            font-family: var(--font-body);
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%230d9488' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.6rem center;
+        }
+
+        .filter-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.4rem 0.75rem;
+            border-radius: var(--radius-full);
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: var(--bg-card-subtle);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            cursor: pointer;
+            user-select: none;
+        }
+        .filter-chip.active { background: var(--primary-pale); border-color: var(--primary-light); color: var(--primary); }
+
+        .view-toggles {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            background: var(--bg-surface);
+            padding: 3px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+        }
+
+        .view-btn {
+            padding: 0.35rem 0.55rem;
+            border-radius: var(--radius-sm);
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+        .view-btn.active { background: white; color: var(--primary); box-shadow: var(--shadow-sm); }
+
+        /* Vinyl Grid */
+        .vinyl-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .vinyl-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            cursor: pointer;
+        }
+        .vinyl-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--primary-light); }
+
+        .cover-wrapper {
+            position: relative;
+            width: 100%;
+            padding-top: 100%;
+            background: #111827;
+            overflow: hidden;
+        }
+
+        .cover-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .vinyl-peek {
+            position: absolute;
+            right: -15px;
+            top: 50%;
+            transform: translateY(-50%) rotate(0deg);
+            width: 80%;
+            height: 80%;
+            border-radius: 50%;
+            background: radial-gradient(circle, #2d3748 0%, #1a202c 60%, #000000 100%);
+            border: 2px solid #4a5568;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            z-index: 1;
+            opacity: 0;
+            transition: all 0.4s ease;
+            pointer-events: none;
+        }
+
+        .vinyl-peek::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 32%;
+            height: 32%;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            border: 2px solid white;
+        }
+
+        .vinyl-card:hover .vinyl-peek { opacity: 0.85; right: 5px; transform: translateY(-50%) rotate(45deg); }
+
+        .card-badges {
+            position: absolute;
+            top: 0.6rem;
+            left: 0.6rem;
+            right: 0.6rem;
+            display: flex;
+            justify-content: space-between;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .badge {
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 0.2rem 0.55rem;
+            border-radius: var(--radius-full);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            color: white;
+        }
+
+        .badge-mint { background: rgba(16, 185, 129, 0.95); }
+        .badge-nm   { background: rgba(13, 148, 136, 0.95); }
+        .badge-vgplus { background: rgba(2, 132, 199, 0.95); }
+        .badge-vg   { background: rgba(14, 165, 233, 0.9); }
+        .badge-gplus { background: rgba(245, 158, 11, 0.95); }
+        .badge-good { background: rgba(234, 88, 12, 0.95); }
+        .badge-fair { background: rgba(239, 68, 68, 0.9); }
+        .badge-poor { background: rgba(100, 116, 139, 0.9); }
+
+        .card-body {
+            padding: 0.95rem;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            gap: 0.3rem;
+        }
+
+        .card-artist {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .card-title {
+            font-family: var(--font-heading);
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-main);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .card-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+        }
+
+        .star-rating {
+            display: inline-flex;
+            align-items: center;
+            color: #f59e0b;
+            font-size: 0.85rem;
+        }
+
+        .card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 1px solid var(--border-color);
+            padding-top: 0.65rem;
+            margin-top: auto;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .price-tag {
+            font-weight: 700;
+            color: var(--accent-green);
+            background: var(--accent-green-pale);
+            padding: 0.2rem 0.45rem;
+            border-radius: var(--radius-sm);
+        }
+
+        /* List View */
+        .vinyl-list { display: flex; flex-direction: column; gap: 0.65rem; }
+
+        .vinyl-list-item {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 0.65rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: var(--shadow-sm);
+            cursor: pointer;
+        }
+        .vinyl-list-item:hover { border-color: var(--primary-light); background: var(--bg-card-subtle); }
+
+        .list-thumb {
+            width: 54px;
+            height: 54px;
+            border-radius: var(--radius-sm);
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        /* Modals */
+        .modal-backdrop {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+        .modal-backdrop.open { display: flex; animation: fadeIn 0.2s ease-out; }
+
+        .modal-container {
+            background: white;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-xl);
+            width: 100%;
+            max-width: 820px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: slideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .modal-header {
+            padding: 1.1rem 1.4rem;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-surface);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title {
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .modal-body { padding: 1.4rem; overflow-y: auto; flex: 1; }
+
+        .modal-footer {
+            padding: 0.9rem 1.4rem;
+            border-top: 1px solid var(--border-color);
+            background: var(--bg-card-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 0.6rem;
+        }
+
+        /* Camera Preview */
+        .camera-preview-box {
+            position: relative;
+            width: 100%;
+            max-width: 440px;
+            aspect-ratio: 1/1;
+            margin: 0 auto;
+            background: #000;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 3px dashed var(--primary-light);
+        }
+        #camera-video { width: 100%; height: 100%; object-fit: cover; }
+        .camera-guide {
+            position: absolute;
+            top: 10%; left: 10%; right: 10%; bottom: 10%;
+            border: 2px solid rgba(255, 255, 255, 0.85);
+            border-radius: var(--radius-sm);
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45);
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Forms */
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+        .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+        .form-group.full-width { grid-column: 1 / -1; }
+        .form-label { font-size: 0.82rem; font-weight: 600; color: var(--text-muted); }
+        .form-input, .form-textarea, .form-select {
+            padding: 0.55rem 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            background: var(--bg-card-subtle);
+            color: var(--text-main);
+            outline: none;
+        }
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+        }
+
+        .track-row {
+            display: grid;
+            grid-template-columns: 45px 1fr 65px 95px 36px;
+            gap: 0.4rem;
+            align-items: center;
+            background: var(--bg-surface);
+            padding: 0.45rem 0.65rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            margin-bottom: 0.4rem;
+        }
+
+        @keyframes spinVinyl { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        @media (max-width: 768px) {
+            .header-container { flex-direction: column; align-items: flex-start; }
+            .nav-actions { width: 100%; justify-content: space-between; }
+            .track-row { grid-template-columns: 40px 1fr 55px 36px; }
+            .track-row select { display: none; }
+            .modal-container { max-height: 96vh; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <a href="#" class="brand">
+                <div class="brand-icon-wrap">
+                    <i data-lucide="disc" style="width: 22px; height: 22px;"></i>
+                </div>
+                <div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span class="brand-title">Vinyl Vault</span>
+                        <span class="brand-badge">PWA</span>
+                    </div>
+                </div>
+            </a>
+
+            <div class="nav-actions">
+                <button class="btn btn-secondary" id="btnSettings">
+                    <i data-lucide="settings"></i> Backup & API
+                </button>
+                <button class="btn btn-accent" id="btnSearchDiscogs">
+                    <i data-lucide="globe"></i> Discogs Søg
+                </button>
+                <button class="btn btn-primary" id="btnAddVinyl">
+                    <i data-lucide="plus"></i> Tilføj LP
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-container">
+        
+        <!-- Turntable Player Banner -->
+        <div class="player-banner" id="playerBanner" style="display: none;">
+            <div class="turntable-preview">
+                <div class="spinning-vinyl" id="turntableVinyl">
+                    <img src="icon.svg" alt="Vinyl Label" class="label-art" id="turntableArt">
+                </div>
+                <div>
+                    <div style="text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1px; color: var(--primary-light); font-weight: 700;">Lytter til nu</div>
+                    <h4 id="nowPlayingTitle" style="font-family: var(--font-heading); font-size: 1.15rem;">Album</h4>
+                    <p id="nowPlayingArtist" style="color: var(--accent-blue-light); font-size: 0.85rem; font-weight: 600;">Artist</p>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.6rem;">
+                <button class="btn btn-secondary" style="background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.25); color: white;" onclick="document.getElementById('turntableVinyl').classList.toggle('paused')">
+                    Pause / Spil
+                </button>
+                <button class="btn btn-secondary" style="background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.25); color: white;" onclick="document.getElementById('playerBanner').style.display='none'">
+                    ✕
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon teal"><i data-lucide="disc-3"></i></div>
+                <div class="stat-content">
+                    <div class="stat-label">Samling</div>
+                    <div class="stat-value" id="statTotalVinyls">0</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon green"><i data-lucide="trending-up"></i></div>
+                <div class="stat-content">
+                    <div class="stat-label">Samlet Værdi</div>
+                    <div class="stat-value" id="statTotalValue">0 kr</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon blue"><i data-lucide="star"></i></div>
+                <div class="stat-content">
+                    <div class="stat-label">Gns. Musik Rating</div>
+                    <div class="stat-value" id="statAvgRating">-</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon mint"><i data-lucide="play"></i></div>
+                <div class="stat-content">
+                    <div class="stat-label">Afspilninger</div>
+                    <div class="stat-value" id="statTotalPlays">0</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Search & Filter Controls -->
+        <section class="controls-bar">
+            <div class="search-row">
+                <div class="search-input-wrap">
+                    <i data-lucide="search"></i>
+                    <input type="text" id="searchInput" class="search-input" placeholder="Søg kunstner, album, pladeselskab, katalognummer...">
+                </div>
+                <div class="view-toggles">
+                    <button class="view-btn active" id="viewGridBtn" title="Gitter"><i data-lucide="layout-grid"></i></button>
+                    <button class="view-btn" id="viewListBtn" title="Liste"><i data-lucide="list"></i></button>
+                </div>
+            </div>
+
+            <div class="filter-row">
+                <select id="genreFilter" class="select-custom">
+                    <option value="">Alle genrer</option>
+                </select>
+
+                <select id="conditionFilter" class="select-custom">
+                    <option value="">Alle stande (Goldmine)</option>
+                    <option value="M">Mint (M)</option>
+                    <option value="NM">Near Mint (NM)</option>
+                    <option value="VG+">Very Good Plus (VG+)</option>
+                    <option value="VG">Very Good (VG)</option>
+                    <option value="G+">Good Plus (G+)</option>
+                    <option value="G">Good (G)</option>
+                    <option value="F">Fair (F)</option>
+                    <option value="P">Poor (P)</option>
+                </select>
+
+                <select id="ratingFilter" class="select-custom">
+                    <option value="">Alle ratings</option>
+                    <option value="5">5 stjerner ★★★★★</option>
+                    <option value="4">4+ stjerner ★★★★☆</option>
+                    <option value="3">3+ stjerner ★★★☆☆</option>
+                </select>
+
+                <div class="filter-chip" id="favFilter">
+                    <i data-lucide="heart" style="width: 14px; height: 14px;"></i> Favoritter
+                </div>
+
+                <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="color: var(--text-muted); font-size: 0.8rem; font-weight: 600;">Sorter:</span>
+                    <select id="sortBy" class="select-custom">
+                        <option value="artist-asc">Kunstner (A-Å)</option>
+                        <option value="artist-desc">Kunstner (Å-A)</option>
+                        <option value="title-asc">Titel (A-Å)</option>
+                        <option value="year-desc">Udgivelsesår (Nyeste)</option>
+                        <option value="rating-desc">Højeste musikrating</option>
+                        <option value="value-desc">Højeste værdi</option>
+                        <option value="play_count-desc">Mest afspillet</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <!-- Collection Container -->
+        <section id="vinylContainer" class="vinyl-grid"></section>
+    </main>
+
+    <!-- MODAL: Vinyl Details -->
+    <div class="modal-backdrop" id="vinylDetailsModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <div class="modal-title" id="detailsModalTitle"><i data-lucide="disc"></i> Vinyl Detaljer</div>
+                <button class="btn btn-secondary btn-icon-only" onclick="closeModal('vinylDetailsModal')">✕</button>
+            </div>
+            <div class="modal-body" id="detailsModalContent"></div>
+        </div>
+    </div>
+
+    <!-- MODAL: Add & Edit Vinyl Form -->
+    <div class="modal-backdrop" id="vinylFormModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <div class="modal-title" id="formModalTitle"><i data-lucide="plus-circle"></i> Tilføj Vinyl</div>
+                <button class="btn btn-secondary btn-icon-only" onclick="closeModal('vinylFormModal')">✕</button>
+            </div>
+            <form id="vinylForm" onsubmit="saveVinylForm(event)">
+                <input type="hidden" id="formVinylId">
+                <div class="modal-body">
+                    
+                    <!-- Cover Capture -->
+                    <div style="background: var(--bg-surface); padding: 1.1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 1.25rem;">
+                        <div style="font-weight: 700; font-size: 0.9rem; margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <i data-lucide="camera"></i> Cover Billede
+                        </div>
+                        <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                            <img id="formCoverPreview" src="icon.svg" style="width: 80px; height: 80px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--border-color); display: none;">
+                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                <button type="button" class="btn btn-accent" id="btnStartCamera">
+                                    <i data-lucide="camera"></i> Tag foto med kamera
+                                </button>
+                                <label class="btn btn-secondary" style="cursor: pointer;">
+                                    <i data-lucide="upload"></i> Vælg billede
+                                    <input type="file" id="coverFileInput" accept="image/*" style="display: none;">
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Core Info -->
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Kunstner / Band *</label>
+                            <input type="text" id="formArtist" class="form-input" placeholder="F.eks. Pink Floyd" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Album Titel *</label>
+                            <input type="text" id="formTitle" class="form-input" placeholder="F.eks. The Dark Side of the Moon" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Udgivelsesår</label>
+                            <input type="number" id="formYear" class="form-input" placeholder="1973">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Genrer</label>
+                            <input type="text" id="formGenre" class="form-input" placeholder="Rock, Prog Rock">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Pladeselskab (Label)</label>
+                            <input type="text" id="formLabel" class="form-input" placeholder="Harvest, EMI">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Katalognummer</label>
+                            <input type="text" id="formCatNo" class="form-input" placeholder="SHVL 804">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Format Detaljer</label>
+                            <input type="text" id="formFormat" class="form-input" placeholder="LP, Album, Gatefold, 180g">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Hastighed</label>
+                            <select id="formSpeed" class="form-select">
+                                <option value="33 ⅓ RPM">33 ⅓ RPM</option>
+                                <option value="45 RPM">45 RPM</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Discogs Grading -->
+                    <div style="background: var(--bg-surface); padding: 1.1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin: 1.25rem 0;">
+                        <div style="font-weight: 700; font-size: 0.85rem; color: var(--primary); margin-bottom: 0.75rem; text-transform: uppercase;">
+                            Stand Vurdering (Discogs Goldmine Grading)
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Media Stand (Vinyl)</label>
+                                <select id="formMediaCondition" class="form-select">
+                                    <option value="M">Mint (M) - Perfekt / Uspillet</option>
+                                    <option value="NM" selected>Near Mint (NM) - Næsten som ny</option>
+                                    <option value="VG+">Very Good Plus (VG+) - Flot eksemplar</option>
+                                    <option value="VG">Very Good (VG) - Let støj i rolige stykker</option>
+                                    <option value="G+">Good Plus (G+) - Slidt, tydelig knitren</option>
+                                    <option value="G">Good (G) - Meget slidt</option>
+                                    <option value="F">Fair (F) - Hårdt medtaget</option>
+                                    <option value="P">Poor (P) - Defekt / Uspillelig</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Sleeve Stand (Cover)</label>
+                                <select id="formSleeveCondition" class="form-select">
+                                    <option value="M">Mint (M) - Perfekt stand</option>
+                                    <option value="NM" selected>Near Mint (NM) - Næsten perfekt</option>
+                                    <option value="VG+">Very Good Plus (VG+) - Pænt cover</option>
+                                    <option value="VG">Very Good (VG) - Let ringwear / hjørneslid</option>
+                                    <option value="G+">Good Plus (G+) - Seam splits / slid</option>
+                                    <option value="G">Good (G) - Meget slidt</option>
+                                </select>
+                            </div>
+                            <div class="form-group full-width">
+                                <label class="form-label">Standnoter (Matrix, Insert etc.)</label>
+                                <input type="text" id="formConditionNotes" class="form-input" placeholder="F.eks. Original inner sleeve medfølger, Matrix A-2">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Music Rating & Price -->
+                    <div class="form-grid" style="margin-bottom: 1.25rem;">
+                        <div class="form-group">
+                            <label class="form-label">Musikkens Vurdering (0 - 5)</label>
+                            <select id="formMusicRating" class="form-select">
+                                <option value="0">Ingen rating</option>
+                                <option value="1">1 stjerne ★☆☆☆☆</option>
+                                <option value="2">2 stjerner ★★☆☆☆</option>
+                                <option value="3">3 stjerner ★★★☆☆</option>
+                                <option value="3.5">3.5 stjerner ★★★½☆</option>
+                                <option value="4">4 stjerner ★★★★☆</option>
+                                <option value="4.5">4.5 stjerner ★★★★½</option>
+                                <option value="5">5 stjerner ★★★★★</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Yndlingsside</label>
+                            <select id="formFavoriteSide" class="form-select">
+                                <option value="">Ingen specifik</option>
+                                <option value="Side A">Side A</option>
+                                <option value="Side B">Side B</option>
+                                <option value="Begge sider">Begge sider</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Købspris (DKK)</label>
+                            <input type="number" step="0.5" id="formPurchasePrice" class="form-input" placeholder="150">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Estimeret Værdi (DKK)</label>
+                            <input type="number" step="0.5" id="formEstimatedValue" class="form-input" placeholder="250">
+                        </div>
+                        <div class="form-group" style="display: flex; flex-direction: row; align-items: center; gap: 0.5rem; margin-top: 1.25rem;">
+                            <input type="checkbox" id="formFavorite" style="width: 18px; height: 18px; accent-color: var(--primary);">
+                            <label for="formFavorite" style="font-weight: 600; cursor: pointer;">Marker som Samlingsfavorit ♥</label>
+                        </div>
+                    </div>
+
+                    <!-- Tracklist -->
+                    <div style="margin-bottom: 1.25rem;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem;">
+                            <label class="form-label" style="font-weight: 700;">Trackliste</label>
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="addTrackRow('', '', '')">+ Tilføj Sang</button>
+                        </div>
+                        <div id="tracklistContainer"></div>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="form-group">
+                        <label class="form-label">Personlige Noter / Lytteoplevelse</label>
+                        <textarea id="formNotes" class="form-textarea" rows="2" placeholder="Skriv noter, lydoplevelse eller smagsnoter..."></textarea>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('vinylFormModal')">Annuller</button>
+                    <button type="submit" class="btn btn-primary">Gem LP</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: Camera Capture -->
+    <div class="modal-backdrop" id="cameraModal">
+        <div class="modal-container" style="max-width: 500px;">
+            <div class="modal-header">
+                <div class="modal-title"><i data-lucide="camera"></i> Tag Coverfoto</div>
+                <button class="btn btn-secondary btn-icon-only" onclick="closeCameraModal()">✕</button>
+            </div>
+            <div class="modal-body" style="text-align: center;">
+                <div class="camera-preview-box">
+                    <video id="camera-video" autoplay playsinline></video>
+                    <div class="camera-guide"><span style="color:white; background:rgba(0,0,0,0.6); padding:4px 8px; border-radius:4px; font-size:0.75rem;">Cover Ramme</span></div>
+                </div>
+            </div>
+            <div class="modal-footer" style="justify-content: center;">
+                <button type="button" class="btn btn-secondary" onclick="closeCameraModal()">Annuller</button>
+                <button type="button" class="btn btn-primary" onclick="snapCameraPhoto()"><i data-lucide="camera"></i> Tag Billede</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Discogs Search -->
+    <div class="modal-backdrop" id="discogsModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <div class="modal-title"><i data-lucide="globe"></i> Søg på Discogs</div>
+                <button class="btn btn-secondary btn-icon-only" onclick="closeModal('discogsModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                    <input type="text" id="discogsSearchQuery" class="form-input" placeholder="Søg kunstner, album, katalognummer eller stregkode..." style="flex: 1;">
+                    <button class="btn btn-primary" onclick="runDiscogsSearch()"><i data-lucide="search"></i> Søg</button>
+                </div>
+                <div id="discogsResults" style="max-height: 400px; overflow-y: auto;">
+                    <div style="text-align: center; padding: 2rem; color: var(--text-muted);">Indtast søgeord ovenfor for at hente data fra Discogs.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Settings & Backup -->
+    <div class="modal-backdrop" id="settingsModal">
+        <div class="modal-container" style="max-width: 540px;">
+            <div class="modal-header">
+                <div class="modal-title"><i data-lucide="settings"></i> Backup & Indstillinger</div>
+                <button class="btn btn-secondary btn-icon-only" onclick="closeModal('settingsModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom: 1.25rem;">
+                    <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.4rem; color: var(--primary);">Discogs API Token (Valgfrit)</h4>
+                    <input type="text" id="settingDiscogsToken" class="form-input" placeholder="Personligt token fra discogs.com/settings/developers">
+                </div>
+                <div style="border-top: 1px solid var(--border-color); padding-top: 1.1rem;">
+                    <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.6rem; color: var(--primary);">Samling Sikkerhedskopi (JSON)</h4>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.85rem;">Tag en komplet backup af din samling eller flyt den til en anden enhed.</p>
+                    <div style="display: flex; gap: 0.6rem;">
+                        <button type="button" class="btn btn-secondary" onclick="exportBackup()"><i data-lucide="download"></i> Download Backup</button>
+                        <button type="button" class="btn btn-secondary" onclick="triggerImportBackup()"><i data-lucide="upload"></i> Importer Backup</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="saveSettings()">Gem</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PWA Storage & Client Script -->
+    <script>
+        // IndexedDB Simple Store
+        const DB_NAME = 'VinylVaultDB';
+        const DB_VERSION = 1;
+        let db = null;
+        let currentVinyls = [];
+        let activeVinyl = null;
+        let currentView = 'grid';
+        let mediaStream = null;
+        let capturedCover = '';
+
+        const GRADING_SCALE = {
+            'M': { name: 'Mint (M)', desc: 'Perfekt stand. Forseglet/uspillet.', badge: 'badge-mint' },
+            'NM': { name: 'Near Mint (NM)', desc: 'Næsten perfekt. Ingen synlige spor.', badge: 'badge-nm' },
+            'VG+': { name: 'Very Good Plus (VG+)', desc: 'Flot eksemplar. Ubetydelig overfladelyd.', badge: 'badge-vgplus' },
+            'VG': { name: 'Very Good (VG)', desc: 'Brugsspor, let knitren i stille passager.', badge: 'badge-vg' },
+            'G+': { name: 'Good Plus (G+)', desc: 'Slidt, knitren, men spiller igennem.', badge: 'badge-gplus' },
+            'G': { name: 'Good (G)', desc: 'Hårdt slidt, overfladestøj.', badge: 'badge-good' },
+            'F': { name: 'Fair (F)', desc: 'Meget slidt, kan hoppe.', badge: 'badge-fair' },
+            'P': { name: 'Poor (P)', desc: 'Uspillelig / ødelagt.', badge: 'badge-poor' }
+        };
+
+        function initIndexedDB() {
+            return new Promise((resolve, reject) => {
+                const req = indexedDB.open(DB_NAME, DB_VERSION);
+                req.onupgradeneeded = (e) => {
+                    const database = e.target.result;
+                    if (!database.objectStoreNames.contains('vinyls')) {
+                        const store = database.createObjectStore('vinyls', { keyPath: 'id', autoIncrement: true });
+                        store.createIndex('artist', 'artist', { unique: false });
+                    }
+                    if (!database.objectStoreNames.contains('settings')) {
+                        database.createObjectStore('settings', { keyPath: 'key' });
+                    }
+                };
+                req.onsuccess = (e) => {
+                    db = e.target.result;
+                    resolve(db);
+                };
+                req.onerror = (e) => reject(e);
+            });
+        }
+
+        async function seedInitialDataIfEmpty() {
+            const count = await getVinylCount();
+            if (count === 0) {
+                await addVinylToDB({
+                    artist: 'Pink Floyd',
+                    title: 'The Dark Side of the Moon',
+                    release_year: 1973,
+                    genre: ['Rock', 'Prog Rock'],
+                    label: 'Harvest',
+                    catalog_no: 'SHVL 804',
+                    format_details: 'LP, Album, Gatefold, 180g',
+                    speed: '33 ⅓ RPM',
+                    cover_image_url: 'https://i.discogs.com/2Xy-Y8pI3bT9_U8s3zWqY1hM-5D5Zz/rs:fit/g:sm/q:90/h:600/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTE4NzMw/MDgtMTYyMTkyNTQ2/OC04Mzg3LmpwZWc.jpeg',
+                    media_condition: 'NM',
+                    sleeve_condition: 'VG+',
+                    condition_notes: 'Original gatefold med intakt plakat.',
+                    music_rating: 5.0,
+                    favorite_side: 'Begge sider',
+                    purchase_price: 275.0,
+                    estimated_value: 350.0,
+                    favorite: true,
+                    play_count: 0,
+                    notes: 'Legendarisk album. Lyder fantastisk på vinyl med dyb analog bund.',
+                    tracks: [
+                        { position: 'A1', title: 'Speak to Me', duration: '1:08', rating: 4, is_favorite: false },
+                        { position: 'A2', title: 'Breathe (In the Air)', duration: '2:49', rating: 5, is_favorite: true },
+                        { position: 'A3', title: 'On the Run', duration: '3:45', rating: 4, is_favorite: false },
+                        { position: 'A4', title: 'Time', duration: '6:53', rating: 5, is_favorite: true },
+                        { position: 'A5', title: 'The Great Gig in the Sky', duration: '4:44', rating: 5, is_favorite: true },
+                        { position: 'B1', title: 'Money', duration: '6:23', rating: 5, is_favorite: true },
+                        { position: 'B2', title: 'Us and Them', duration: '7:49', rating: 5, is_favorite: true },
+                        { position: 'B3', title: 'Any Colour You Like', duration: '3:26', rating: 4, is_favorite: false },
+                        { position: 'B4', title: 'Brain Damage', duration: '3:46', rating: 5, is_favorite: true },
+                        { position: 'B5', title: 'Eclipse', duration: '2:12', rating: 5, is_favorite: true }
+                    ]
+                });
+
+                await addVinylToDB({
+                    artist: 'Miles Davis',
+                    title: 'Kind of Blue',
+                    release_year: 1959,
+                    genre: ['Jazz', 'Modal Jazz'],
+                    label: 'Columbia',
+                    catalog_no: 'CS 8163',
+                    format_details: 'LP, Album, 180g Remastered',
+                    speed: '33 ⅓ RPM',
+                    cover_image_url: 'https://i.discogs.com/wYF1MhS9A8h4qf5o0M/rs:fit/g:sm/q:90/h:600/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTEwODQ2/NTktMTIxNjAyODU2/MS5qcGVn.jpeg',
+                    media_condition: 'M',
+                    sleeve_condition: 'NM',
+                    condition_notes: 'Uspillet 180g pressing.',
+                    music_rating: 5.0,
+                    favorite_side: 'Side A',
+                    purchase_price: 199.0,
+                    estimated_value: 220.0,
+                    favorite: true,
+                    play_count: 0,
+                    notes: 'Det ultimative jazz-album til aftenstunderne med et godt glas rødvin.',
+                    tracks: [
+                        { position: 'A1', title: 'So What', duration: '9:22', rating: 5, is_favorite: true },
+                        { position: 'A2', title: 'Freddie Freeloader', duration: '9:46', rating: 5, is_favorite: false },
+                        { position: 'A3', title: 'Blue in Green', duration: '5:37', rating: 5, is_favorite: true },
+                        { position: 'B1', title: 'All Blues', duration: '11:33', rating: 5, is_favorite: true },
+                        { position: 'B2', title: 'Flamenco Sketches', duration: '9:26', rating: 5, is_favorite: false }
+                    ]
+                });
+            }
+        }
+
+        function getVinylCount() {
+            return new Promise((resolve) => {
+                const tx = db.transaction('vinyls', 'readonly');
+                const req = tx.objectStore('vinyls').count();
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => resolve(0);
+            });
+        }
+
+        function addVinylToDB(data) {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction('vinyls', 'readwrite');
+                const store = tx.objectStore('vinyls');
+                data.created_at = new Date().toISOString();
+                const req = store.add(data);
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = (e) => reject(e);
+            });
+        }
+
+        function updateVinylInDB(id, data) {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction('vinyls', 'readwrite');
+                const store = tx.objectStore('vinyls');
+                data.id = id;
+                data.updated_at = new Date().toISOString();
+                const req = store.put(data);
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = (e) => reject(e);
+            });
+        }
+
+        function getAllVinylsFromDB() {
+            return new Promise((resolve) => {
+                const tx = db.transaction('vinyls', 'readonly');
+                const store = tx.objectStore('vinyls');
+                const req = store.getAll();
+                req.onsuccess = () => resolve(req.result || []);
+                req.onerror = () => resolve([]);
+            });
+        }
+
+        function deleteVinylFromDB(id) {
+            return new Promise((resolve) => {
+                const tx = db.transaction('vinyls', 'readwrite');
+                tx.objectStore('vinyls').delete(id);
+                tx.oncomplete = () => resolve(true);
+            });
+        }
+
+        // App Initialization
+        document.addEventListener('DOMContentLoaded', async () => {
+            await initIndexedDB();
+            await seedInitialDataIfEmpty();
+            setupEventListeners();
+            loadVinyls();
+            
+            // Register PWA Service Worker
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js').catch(() => {});
+            }
+        });
+
+        function setupEventListeners() {
+            document.getElementById('searchInput').addEventListener('input', loadVinyls);
+            document.getElementById('genreFilter').addEventListener('change', loadVinyls);
+            document.getElementById('conditionFilter').addEventListener('change', loadVinyls);
+            document.getElementById('ratingFilter').addEventListener('change', loadVinyls);
+            document.getElementById('sortBy').addEventListener('change', loadVinyls);
+            document.getElementById('favFilter').addEventListener('click', function() {
+                this.classList.toggle('active');
+                loadVinyls();
+            });
+
+            document.getElementById('viewGridBtn').addEventListener('click', () => setView('grid'));
+            document.getElementById('viewListBtn').addEventListener('click', () => setView('list'));
+            document.getElementById('btnAddVinyl').addEventListener('click', () => openVinylModal());
+            document.getElementById('btnSettings').addEventListener('click', openSettingsModal);
+            document.getElementById('btnStartCamera').addEventListener('click', openCameraModal);
+            document.getElementById('btnSearchDiscogs').addEventListener('click', openDiscogsModal);
+            
+            document.getElementById('coverFileInput').addEventListener('change', handleFileUpload);
+            document.getElementById('discogsSearchQuery').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') runDiscogsSearch();
+            });
+        }
+
+        function setView(view) {
+            currentView = view;
+            document.getElementById('viewGridBtn').classList.toggle('active', view === 'grid');
+            document.getElementById('viewListBtn').classList.toggle('active', view === 'list');
+            renderVinyls();
+        }
+
+        async function loadVinyls() {
+            let list = await getAllVinylsFromDB();
+            
+            // Stats
+            const totalVal = list.reduce((acc, v) => acc + (parseFloat(v.estimated_value) || parseFloat(v.purchase_price) || 0), 0);
+            const rated = list.filter(v => v.music_rating > 0);
+            const avgRat = rated.length ? (rated.reduce((acc, v) => acc + v.music_rating, 0) / rated.length).toFixed(1) : '-';
+            const totalPlays = list.reduce((acc, v) => acc + (v.play_count || 0), 0);
+
+            document.getElementById('statTotalVinyls').innerText = list.length;
+            document.getElementById('statTotalValue').innerText = Math.round(totalVal).toLocaleString('da-DK') + ' kr';
+            document.getElementById('statAvgRating').innerText = avgRat !== '-' ? `${avgRat} ★` : '-';
+            document.getElementById('statTotalPlays').innerText = totalPlays;
+
+            // Genres dropdown
+            const genreSet = new Set();
+            list.forEach(v => {
+                if (Array.isArray(v.genre)) v.genre.forEach(g => genreSet.add(g));
+            });
+            const genreSelect = document.getElementById('genreFilter');
+            const curG = genreSelect.value;
+            genreSelect.innerHTML = '<option value="">Alle genrer</option>';
+            Array.from(genreSet).sort().forEach(g => {
+                const opt = document.createElement('option');
+                opt.value = g; opt.innerText = g;
+                if (g === curG) opt.selected = true;
+                genreSelect.appendChild(opt);
+            });
+
+            // Filters
+            const search = document.getElementById('searchInput').value.toLowerCase().trim();
+            const genre = document.getElementById('genreFilter').value;
+            const condition = document.getElementById('conditionFilter').value;
+            const minRating = parseFloat(document.getElementById('ratingFilter').value) || 0;
+            const favOnly = document.getElementById('favFilter').classList.contains('active');
+
+            if (search) {
+                list = list.filter(v => 
+                    (v.artist||'').toLowerCase().includes(search) || 
+                    (v.title||'').toLowerCase().includes(search) || 
+                    (v.label||'').toLowerCase().includes(search) || 
+                    (v.catalog_no||'').toLowerCase().includes(search)
+                );
+            }
+            if (genre) list = list.filter(v => v.genre && v.genre.includes(genre));
+            if (condition) list = list.filter(v => v.media_condition === condition);
+            if (minRating > 0) list = list.filter(v => (v.music_rating || 0) >= minRating);
+            if (favOnly) list = list.filter(v => v.favorite);
+
+            // Sorting
+            const [sortBy, sortOrder] = document.getElementById('sortBy').value.split('-');
+            list.sort((a, b) => {
+                let valA = a[sortBy], valB = b[sortBy];
+                if (typeof valA === 'string') valA = valA.toLowerCase();
+                if (typeof valB === 'string') valB = valB.toLowerCase();
+                if (valA < valB) return sortOrder === 'asc' ? -1 : 1;
+                if (valA > valB) return sortOrder === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            currentVinyls = list;
+            renderVinyls();
+        }
+
+        function renderVinyls() {
+            const container = document.getElementById('vinylContainer');
+            if (!currentVinyls.length) {
+                container.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 3.5rem 1rem; color: var(--text-muted);">
+                        <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">🎵</div>
+                        <h3 style="font-size: 1.2rem; margin-bottom: 0.4rem; color: var(--text-main);">Ingen plader i denne visning</h3>
+                        <p style="font-size: 0.85rem; margin-bottom: 1.25rem;">Klik på "Tilføj LP" eller søg på Discogs for at tilføje.</p>
+                        <button class="btn btn-primary" onclick="openVinylModal()"><i data-lucide="plus"></i> Tilføj Ny Vinyl</button>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            if (currentView === 'grid') {
+                container.className = 'vinyl-grid';
+                container.innerHTML = currentVinyls.map(v => {
+                    const cover = v.custom_cover || v.cover_image_url || 'icon.svg';
+                    const condClass = GRADING_SCALE[v.media_condition]?.badge || 'badge-vgplus';
+                    const stars = renderStars(v.music_rating || 0);
+                    const valStr = v.estimated_value ? `${v.estimated_value} kr` : (v.purchase_price ? `${v.purchase_price} kr` : '');
+
+                    return `
+                        <div class="vinyl-card" onclick="openVinylDetails(${v.id})">
+                            <div class="cover-wrapper">
+                                <img src="${cover}" alt="${escapeHtml(v.title)}" class="cover-img" onerror="this.src='icon.svg'" loading="lazy">
+                                <div class="vinyl-peek"></div>
+                                <div class="card-badges">
+                                    <span class="badge ${condClass}">${v.media_condition || 'VG+'}</span>
+                                    ${v.favorite ? '<span class="badge" style="background:white; color:#ef4444;">♥</span>' : ''}
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-artist">${escapeHtml(v.artist)}</div>
+                                <div class="card-title" title="${escapeHtml(v.title)}">${escapeHtml(v.title)}</div>
+                                <div class="card-meta">
+                                    <span>${v.release_year || 'Ukendt år'}</span>
+                                    <span class="star-rating">${stars}</span>
+                                </div>
+                                <div class="card-footer">
+                                    <span>${(v.genre && v.genre[0]) || 'LP'}</span>
+                                    ${valStr ? `<span class="price-tag">${valStr}</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                container.className = 'vinyl-list';
+                container.innerHTML = currentVinyls.map(v => {
+                    const cover = v.custom_cover || v.cover_image_url || 'icon.svg';
+                    const condClass = GRADING_SCALE[v.media_condition]?.badge || 'badge-vgplus';
+                    const stars = renderStars(v.music_rating || 0);
+                    return `
+                        <div class="vinyl-list-item" onclick="openVinylDetails(${v.id})">
+                            <img src="${cover}" class="list-thumb" onerror="this.src='icon.svg'">
+                            <div style="flex:1; min-width:0;">
+                                <div style="font-weight:700; font-size:0.95rem; color:var(--text-main);">${escapeHtml(v.title)}</div>
+                                <div style="color:var(--primary); font-weight:600; font-size:0.85rem;">${escapeHtml(v.artist)}</div>
+                                <div style="color:var(--text-muted); font-size:0.75rem;">${v.release_year || ''} • ${v.label || ''}</div>
+                            </div>
+                            <div style="text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:0.2rem;">
+                                <span class="badge ${condClass}">${v.media_condition || 'VG+'}</span>
+                                <div class="star-rating">${stars}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+            lucide.createIcons();
+        }
+
+        function renderStars(rating) {
+            let out = '';
+            for (let i = 1; i <= 5; i++) {
+                if (rating >= i) out += '★';
+                else if (rating >= i - 0.5) out += '★';
+                else out += '<span style="color:#cbd5e1;">☆</span>';
+            }
+            return out;
+        }
+
+        // Details Modal
+        function openVinylDetails(id) {
+            const v = currentVinyls.find(item => item.id === id);
+            if (!v) return;
+            activeVinyl = v;
+
+            document.getElementById('detailsModalTitle').innerText = `${v.artist} - ${v.title}`;
+            const cover = v.custom_cover || v.cover_image_url || 'icon.svg';
+            const mediaCond = GRADING_SCALE[v.media_condition] || GRADING_SCALE['VG+'];
+            const sleeveCond = GRADING_SCALE[v.sleeve_condition] || GRADING_SCALE['VG+'];
+
+            let tracksHtml = '<p style="color:var(--text-muted); font-size:0.85rem;">Ingen trackliste registreret.</p>';
+            if (v.tracks && v.tracks.length > 0) {
+                tracksHtml = `
+                    <div style="display:flex; flex-direction:column; gap:0.35rem;">
+                        ${v.tracks.map((t, idx) => `
+                            <div style="display:flex; align-items:center; justify-content:space-between; padding:0.4rem 0.65rem; background:var(--bg-card-subtle); border-radius:var(--radius-sm); border:1px solid var(--border-color); font-size:0.85rem;">
+                                <div style="display:flex; align-items:center; gap:0.6rem;">
+                                    <span style="font-weight:700; color:var(--primary); width:24px;">${t.position || (idx+1)}</span>
+                                    <span>${escapeHtml(t.title)}</span>
+                                    ${t.duration ? `<span style="color:var(--text-light); font-size:0.75rem;">(${t.duration})</span>` : ''}
+                                </div>
+                                <div style="display:flex; align-items:center; gap:0.5rem;">
+                                    <span style="color:#f59e0b; cursor:pointer;" onclick="quickRateTrack(${idx}, 5)">${renderTrackStars(t.rating || 0)}</span>
+                                    <button style="background:none; border:none; cursor:pointer; color:${t.is_favorite ? '#ef4444':'#cbd5e1'}; font-size:1rem;" onclick="toggleTrackFav(${idx})">♥</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            document.getElementById('detailsModalContent').innerHTML = `
+                <div style="display:grid; grid-template-columns: 1fr 1.5fr; gap:1.25rem;">
+                    <div>
+                        <div style="position:relative; width:100%; aspect-ratio:1/1; border-radius:var(--radius-md); overflow:hidden; box-shadow:var(--shadow-md); margin-bottom:0.75rem;">
+                            <img src="${cover}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='icon.svg'">
+                        </div>
+                        <button class="btn btn-primary" style="width:100%; margin-bottom:0.5rem;" onclick="playVinyl(${v.id})">
+                            <i data-lucide="disc"></i> Sæt på pladespilleren
+                        </button>
+                        <div style="display:flex; gap:0.4rem;">
+                            <button class="btn btn-secondary" style="flex:1;" onclick="editVinyl(${v.id})"><i data-lucide="edit-3"></i> Rediger</button>
+                            <button class="btn btn-danger" style="flex:1;" onclick="deleteVinyl(${v.id})"><i data-lucide="trash-2"></i> Slet</button>
+                        </div>
+                        <div style="margin-top:1rem; font-size:0.8rem; color:var(--text-muted); display:flex; flex-direction:column; gap:0.25rem;">
+                            <div><strong>Spillet:</strong> ${v.play_count || 0} gange</div>
+                            ${v.purchase_price ? `<div><strong>Købspris:</strong> ${v.purchase_price} DKK</div>` : ''}
+                            ${v.estimated_value ? `<div><strong>Estimeret Værdi:</strong> <span style="color:var(--accent-green); font-weight:700;">${v.estimated_value} DKK</span></div>` : ''}
+                            ${v.discogs_url ? `<div><a href="${v.discogs_url}" target="_blank" style="color:var(--accent-blue); text-decoration:none; font-weight:600;">Se på Discogs ↗</a></div>` : ''}
+                        </div>
+                    </div>
+
+                    <div>
+                        <h2 style="font-family:var(--font-heading); font-size:1.4rem; font-weight:800;">${escapeHtml(v.title)}</h2>
+                        <h3 style="font-size:1.05rem; font-weight:600; color:var(--primary); margin-bottom:0.6rem;">${escapeHtml(v.artist)}</h3>
+                        
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.6rem; background:var(--bg-surface); padding:0.75rem; border-radius:var(--radius-md); border:1px solid var(--border-color); margin-bottom:0.85rem;">
+                            <div>
+                                <div style="font-size:0.7rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Vinyl Stand</div>
+                                <div style="margin-top:2px;"><span class="badge ${mediaCond.badge}">${v.media_condition || 'VG+'}</span></div>
+                                <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">${mediaCond.desc}</div>
+                            </div>
+                            <div>
+                                <div style="font-size:0.7rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Cover Stand</div>
+                                <div style="margin-top:2px;"><span class="badge ${sleeveCond.badge}">${v.sleeve_condition || 'VG+'}</span></div>
+                                <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">${sleeveCond.desc}</div>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.85rem; padding:0.5rem 0.75rem; background:white; border:1px solid var(--border-color); border-radius:var(--radius-md);">
+                            <span style="font-weight:700; font-size:0.85rem;">Musikkens Vurdering:</span>
+                            <div class="star-rating" style="font-size:1.15rem;">
+                                ${renderStars(v.music_rating || 0)}
+                                <span style="font-size:0.85rem; font-weight:700; color:var(--text-muted); margin-left:0.4rem;">${v.music_rating || 0}/5</span>
+                            </div>
+                        </div>
+
+                        ${v.condition_notes ? `<div style="font-size:0.8rem; margin-bottom:0.6rem; background:#fffbeb; padding:0.4rem 0.6rem; border-radius:var(--radius-sm); border:1px solid #fef3c7;"><strong>Stand:</strong> ${escapeHtml(v.condition_notes)}</div>` : ''}
+                        ${v.notes ? `<div style="font-size:0.8rem; margin-bottom:0.6rem; background:var(--bg-card-subtle); padding:0.4rem 0.6rem; border-radius:var(--radius-sm); border:1px solid var(--border-color);"><strong>Noter:</strong> ${escapeHtml(v.notes)}</div>` : ''}
+
+                        <div style="margin-top:0.85rem;">
+                            <h4 style="font-size:0.9rem; font-weight:700; margin-bottom:0.4rem; display:flex; justify-content:space-between;">
+                                <span>Trackliste</span>
+                                ${v.favorite_side ? `<span style="font-size:0.75rem; color:var(--accent-blue);">Yndlingsside: ${v.favorite_side}</span>` : ''}
+                            </h4>
+                            ${tracksHtml}
+                        </div>
+                    </div>
+                </div>
+            `;
+            openModal('vinylDetailsModal');
+            lucide.createIcons();
+        }
+
+        function renderTrackStars(r) {
+            let out = '';
+            for (let i = 1; i <= 5; i++) out += i <= r ? '★' : '☆';
+            return out;
+        }
+
+        async function quickRateTrack(idx, rating) {
+            if (!activeVinyl || !activeVinyl.tracks) return;
+            activeVinyl.tracks[idx].rating = activeVinyl.tracks[idx].rating === 5 ? 0 : 5;
+            await updateVinylInDB(activeVinyl.id, activeVinyl);
+            openVinylDetails(activeVinyl.id);
+        }
+
+        async function toggleTrackFav(idx) {
+            if (!activeVinyl || !activeVinyl.tracks) return;
+            activeVinyl.tracks[idx].is_favorite = !activeVinyl.tracks[idx].is_favorite;
+            await updateVinylInDB(activeVinyl.id, activeVinyl);
+            openVinylDetails(activeVinyl.id);
+        }
+
+        async function playVinyl(id) {
+            const v = currentVinyls.find(item => item.id === id);
+            if (!v) return;
+            v.play_count = (v.play_count || 0) + 1;
+            v.last_played_at = new Date().toLocaleDateString('da-DK');
+            await updateVinylInDB(v.id, v);
+            
+            document.getElementById('playerBanner').style.display = 'flex';
+            document.getElementById('nowPlayingArtist').innerText = v.artist;
+            document.getElementById('nowPlayingTitle').innerText = v.title;
+            document.getElementById('turntableArt').src = v.custom_cover || v.cover_image_url || 'icon.svg';
+            document.getElementById('turntableVinyl').classList.remove('paused');
+            
+            closeModal('vinylDetailsModal');
+            loadVinyls();
+        }
+
+        // Form Modal
+        function openVinylModal(vinylToEdit = null) {
+            document.getElementById('vinylForm').reset();
+            capturedCover = '';
+            document.getElementById('tracklistContainer').innerHTML = '';
+
+            if (vinylToEdit) {
+                document.getElementById('formModalTitle').innerText = 'Rediger Vinyl';
+                document.getElementById('formVinylId').value = vinylToEdit.id;
+                document.getElementById('formArtist').value = vinylToEdit.artist || '';
+                document.getElementById('formTitle').value = vinylToEdit.title || '';
+                document.getElementById('formYear').value = vinylToEdit.release_year || '';
+                document.getElementById('formGenre').value = Array.isArray(vinylToEdit.genre) ? vinylToEdit.genre.join(', ') : (vinylToEdit.genre || '');
+                document.getElementById('formLabel').value = vinylToEdit.label || '';
+                document.getElementById('formCatNo').value = vinylToEdit.catalog_no || '';
+                document.getElementById('formFormat').value = vinylToEdit.format_details || 'LP, Album';
+                document.getElementById('formSpeed').value = vinylToEdit.speed || '33 ⅓ RPM';
+                document.getElementById('formMediaCondition').value = vinylToEdit.media_condition || 'VG+';
+                document.getElementById('formSleeveCondition').value = vinylToEdit.sleeve_condition || 'VG+';
+                document.getElementById('formMusicRating').value = vinylToEdit.music_rating || 0;
+                document.getElementById('formFavoriteSide').value = vinylToEdit.favorite_side || '';
+                document.getElementById('formPurchasePrice').value = vinylToEdit.purchase_price || '';
+                document.getElementById('formEstimatedValue').value = vinylToEdit.estimated_value || '';
+                document.getElementById('formConditionNotes').value = vinylToEdit.condition_notes || '';
+                document.getElementById('formNotes').value = vinylToEdit.notes || '';
+                document.getElementById('formFavorite').checked = Boolean(vinylToEdit.favorite);
+                
+                const c = vinylToEdit.custom_cover || vinylToEdit.cover_image_url;
+                if (c) {
+                    document.getElementById('formCoverPreview').src = c;
+                    document.getElementById('formCoverPreview').style.display = 'block';
+                    capturedCover = c;
+                } else {
+                    document.getElementById('formCoverPreview').style.display = 'none';
+                }
+
+                if (vinylToEdit.tracks) {
+                    vinylToEdit.tracks.forEach(t => addTrackRow(t.position, t.title, t.duration, t.rating));
+                }
+            } else {
+                document.getElementById('formModalTitle').innerText = 'Tilføj Ny Vinyl';
+                document.getElementById('formVinylId').value = '';
+                document.getElementById('formCoverPreview').style.display = 'none';
+                ['A1', 'A2', 'B1', 'B2'].forEach(p => addTrackRow(p, '', ''));
+            }
+
+            openModal('vinylFormModal');
+        }
+
+        function addTrackRow(pos = '', title = '', dur = '', rat = 0) {
+            const c = document.getElementById('tracklistContainer');
+            const div = document.createElement('div');
+            div.className = 'track-row';
+            div.innerHTML = `
+                <input type="text" placeholder="Pos" value="${pos}" class="form-input track-pos" style="padding:0.35rem; text-align:center;">
+                <input type="text" placeholder="Sangtitel" value="${escapeHtml(title)}" class="form-input track-title" style="padding:0.35rem;">
+                <input type="text" placeholder="Tid" value="${dur}" class="form-input track-dur" style="padding:0.35rem; text-align:center;">
+                <select class="form-select track-rating" style="padding:0.35rem;">
+                    <option value="0" ${rat==0?'selected':''}>0 ★</option>
+                    <option value="5" ${rat==5?'selected':''}>5 ★</option>
+                </select>
+                <button type="button" class="btn btn-danger btn-icon-only" onclick="this.parentElement.remove()" style="padding:0.35rem;">✕</button>
+            `;
+            c.appendChild(div);
+        }
+
+        async function saveVinylForm(e) {
+            e.preventDefault();
+            const id = document.getElementById('formVinylId').value;
+            
+            const trackRows = document.querySelectorAll('#tracklistContainer .track-row');
+            const tracks = [];
+            trackRows.forEach(row => {
+                const title = row.querySelector('.track-title').value.trim();
+                if (title) {
+                    tracks.push({
+                        position: row.querySelector('.track-pos').value.trim(),
+                        title: title,
+                        duration: row.querySelector('.track-dur').value.trim(),
+                        rating: parseInt(row.querySelector('.track-rating')?.value) || 0
+                    });
+                }
+            });
+
+            const data = {
+                artist: document.getElementById('formArtist').value.trim(),
+                title: document.getElementById('formTitle').value.trim(),
+                release_year: parseInt(document.getElementById('formYear').value) || null,
+                genre: document.getElementById('formGenre').value.split(',').map(s=>s.trim()).filter(Boolean),
+                label: document.getElementById('formLabel').value.trim(),
+                catalog_no: document.getElementById('formCatNo').value.trim(),
+                format_details: document.getElementById('formFormat').value.trim(),
+                speed: document.getElementById('formSpeed').value,
+                media_condition: document.getElementById('formMediaCondition').value,
+                sleeve_condition: document.getElementById('formSleeveCondition').value,
+                music_rating: parseFloat(document.getElementById('formMusicRating').value) || 0,
+                favorite_side: document.getElementById('formFavoriteSide').value,
+                purchase_price: parseFloat(document.getElementById('formPurchasePrice').value) || null,
+                estimated_value: parseFloat(document.getElementById('formEstimatedValue').value) || null,
+                condition_notes: document.getElementById('formConditionNotes').value.trim(),
+                notes: document.getElementById('formNotes').value.trim(),
+                favorite: document.getElementById('formFavorite').checked,
+                custom_cover: capturedCover,
+                tracks: tracks
+            };
+
+            if (id) {
+                await updateVinylInDB(parseInt(id), data);
+            } else {
+                await addVinylToDB(data);
+            }
+
+            closeModal('vinylFormModal');
+            loadVinyls();
+        }
+
+        function editVinyl(id) {
+            closeModal('vinylDetailsModal');
+            const v = currentVinyls.find(item => item.id === id);
+            if (v) openVinylModal(v);
+        }
+
+        async function deleteVinyl(id) {
+            if (!confirm('Vil du slette denne plade fra samlingen?')) return;
+            await deleteVinylFromDB(id);
+            closeModal('vinylDetailsModal');
+            loadVinyls();
+        }
+
+        // Camera Live
+        async function openCameraModal() {
+            openModal('cameraModal');
+            try {
+                mediaStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment', width: { ideal: 1080 }, height: { ideal: 1080 } }
+                });
+                document.getElementById('camera-video').srcObject = mediaStream;
+            } catch (err) {
+                alert('Kunne ikke åbne kamera. Giv tilladelse i browseren.');
+                closeCameraModal();
+            }
+        }
+
+        function closeCameraModal() {
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(t => t.stop());
+                mediaStream = null;
+            }
+            closeModal('cameraModal');
+        }
+
+        function snapCameraPhoto() {
+            const v = document.getElementById('camera-video');
+            const canvas = document.createElement('canvas');
+            const size = Math.min(v.videoWidth || 600, v.videoHeight || 600);
+            canvas.width = 600; canvas.height = 600;
+            const ctx = canvas.getContext('2d');
+            const sx = ((v.videoWidth || 600) - size) / 2;
+            const sy = ((v.videoHeight || 600) - size) / 2;
+            ctx.drawImage(v, sx, sy, size, size, 0, 0, 600, 600);
+            
+            capturedCover = canvas.toDataURL('image/jpeg', 0.85);
+            document.getElementById('formCoverPreview').src = capturedCover;
+            document.getElementById('formCoverPreview').style.display = 'block';
+            closeCameraModal();
+        }
+
+        function handleFileUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                capturedCover = event.target.result;
+                document.getElementById('formCoverPreview').src = capturedCover;
+                document.getElementById('formCoverPreview').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Discogs Integration via client fetch
+        function openDiscogsModal() {
+            openModal('discogsModal');
+            document.getElementById('discogsSearchQuery').focus();
+        }
+
+        async function runDiscogsSearch() {
+            const q = document.getElementById('discogsSearchQuery').value.trim();
+            if (!q) return;
+            const resBox = document.getElementById('discogsResults');
+            resBox.innerHTML = '<div style="text-align:center; padding:2rem;">Søger på Discogs...</div>';
+
+            try {
+                // Using corsproxy.io for direct client-side Discogs requests
+                const targetUrl = `https://api.discogs.com/database/search?q=${encodeURIComponent(q)}&type=release&format=Vinyl&per_page=15`;
+                const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(targetUrl)}`;
+                
+                const resp = await fetch(proxyUrl, {
+                    headers: { 'User-Agent': 'VinylVaultPWA/1.0' }
+                });
+                const data = await resp.json();
+                
+                if (!data.results || !data.results.length) {
+                    resBox.innerHTML = '<div style="text-align:center; padding:2rem; color:var(--text-muted);">Ingen resultater fundet.</div>';
+                    return;
+                }
+
+                resBox.innerHTML = data.results.map(r => {
+                    let artist = '', album = r.title;
+                    if (r.title.includes(' - ')) {
+                        const parts = r.title.split(' - ');
+                        artist = parts[0].trim();
+                        album = parts.slice(1).join(' - ').trim();
+                    }
+                    return `
+                        <div style="display:flex; align-items:center; justify-content:space-between; padding:0.65rem; background:var(--bg-card-subtle); border-radius:var(--radius-md); border:1px solid var(--border-color); gap:0.75rem; margin-bottom:0.5rem;">
+                            <img src="${r.thumb || 'icon.svg'}" style="width:48px; height:48px; object-fit:cover; border-radius:4px;" onerror="this.src='icon.svg'">
+                            <div style="flex:1; min-width:0;">
+                                <div style="font-weight:700; font-size:0.9rem; color:var(--text-main);">${escapeHtml(album)}</div>
+                                <div style="color:var(--primary); font-size:0.8rem; font-weight:600;">${escapeHtml(artist || r.title)}</div>
+                                <div style="color:var(--text-muted); font-size:0.72rem;">${r.year || ''} • ${r.label ? r.label[0] : ''} • ${r.country || ''}</div>
+                            </div>
+                            <button class="btn btn-secondary btn-sm" onclick="importDiscogsRelease(${r.id})">Vælg</button>
+                        </div>
+                    `;
+                }).join('');
+            } catch (e) {
+                resBox.innerHTML = '<div style="text-align:center; color:#dc2626; padding:2rem;">Kunne ikke søge på Discogs.</div>';
+            }
+        }
+
+        async function importDiscogsRelease(releaseId) {
+            try {
+                const targetUrl = `https://api.discogs.com/releases/${releaseId}`;
+                const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(targetUrl)}`;
+                const resp = await fetch(proxyUrl);
+                const rel = await resp.json();
+
+                closeModal('discogsModal');
+
+                let artist = (rel.artists && rel.artists[0]?.name) || '';
+                artist = artist.replace(/\s*\(\d+\)$/, '');
+                
+                document.getElementById('formArtist').value = artist;
+                document.getElementById('formTitle').value = rel.title || '';
+                document.getElementById('formYear').value = rel.year || '';
+                document.getElementById('formGenre').value = (rel.genres || []).join(', ');
+                document.getElementById('formLabel').value = (rel.labels && rel.labels[0]?.name) || '';
+                document.getElementById('formCatNo').value = (rel.labels && rel.labels[0]?.catno) || '';
+                document.getElementById('formFormat').value = (rel.formats && rel.formats[0]?.descriptions ? rel.formats[0].descriptions.join(', ') : 'LP, Album');
+                
+                if (rel.lowest_price) {
+                    document.getElementById('formEstimatedValue').value = Math.round(rel.lowest_price * 7.46 * 1.5);
+                }
+
+                if (rel.images && rel.images[0]?.uri) {
+                    capturedCover = rel.images[0].uri;
+                    document.getElementById('formCoverPreview').src = capturedCover;
+                    document.getElementById('formCoverPreview').style.display = 'block';
+                }
+
+                const c = document.getElementById('tracklistContainer');
+                c.innerHTML = '';
+                if (rel.tracklist) {
+                    rel.tracklist.filter(t => t.type_ !== 'heading').forEach(t => {
+                        addTrackRow(t.position, t.title, t.duration, 0);
+                    });
+                }
+            } catch (err) {
+                alert('Kunne ikke hente release detaljer.');
+            }
+        }
+
+        // Backup & Settings
+        function openSettingsModal() { openModal('settingsModal'); }
+        function saveSettings() { closeModal('settingsModal'); }
+
+        async function exportBackup() {
+            const list = await getAllVinylsFromDB();
+            const blob = new Blob([JSON.stringify({ exported_at: new Date().toISOString(), vinyls: list }, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `vinyl-vault-backup-${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function triggerImportBackup() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                try {
+                    const text = await file.text();
+                    const data = JSON.parse(text);
+                    const vinyls = data.vinyls || [];
+                    for (const v of vinyls) {
+                        delete v.id;
+                        await addVinylToDB(v);
+                    }
+                    alert(`Importerede ${vinyls.length} plader.`);
+                    closeModal('settingsModal');
+                    loadVinyls();
+                } catch (err) {
+                    alert('Ugyldig backup fil.');
+                }
+            };
+            input.click();
+        }
+
+        function openModal(id) { document.getElementById(id).classList.add('open'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+    </script>
+</body>
+</html>

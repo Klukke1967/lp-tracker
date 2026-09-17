@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0d9488"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+    <radialGradient id="vinylGrooves" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="60%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </radialGradient>
+  </defs>
+  <!-- Background Icon Squircle -->
+  <rect width="512" height="512" rx="115" fill="url(#bgGrad)"/>
+  
+  <!-- Outer Vinyl Edge -->
+  <circle cx="256" cy="256" r="180" fill="url(#vinylGrooves)" stroke="#334155" stroke-width="4"/>
+  
+  <!-- Grooves -->
+  <circle cx="256" cy="256" r="160" fill="none" stroke="#334155" stroke-width="2" opacity="0.6"/>
+  <circle cx="256" cy="256" r="140" fill="none" stroke="#1e293b" stroke-width="3" opacity="0.9"/>
+  <circle cx="256" cy="256" r="120" fill="none" stroke="#334155" stroke-width="2" opacity="0.6"/>
+  <circle cx="256" cy="256" r="100" fill="none" stroke="#1e293b" stroke-width="3" opacity="0.9"/>
+  
+  <!-- Center Label -->
+  <circle cx="256" cy="256" r="68" fill="#2dd4bf" stroke="#ffffff" stroke-width="4"/>
+  <text x="256" y="250" font-family="system-ui, sans-serif" font-weight="900" font-size="18" fill="#0f172a" text-anchor="middle" letter-spacing="1">VINYL</text>
+  <text x="256" y="270" font-family="system-ui, sans-serif" font-weight="700" font-size="12" fill="#0d9488" text-anchor="middle">VAULT</text>
+  
+  <!-- Spindle Hole -->
+  <circle cx="256" cy="256" r="14" fill="#0f172a" stroke="#ffffff" stroke-width="2"/>
+</svg>
