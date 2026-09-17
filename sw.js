@@ -1,4 +1,4 @@
-const CACHE_NAME = 'vinyl-vault-v1';
+const CACHE_NAME = 'vinyl-vault-v2';
 const ASSETS = [
   '/',
   '/index.html',
