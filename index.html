@@ -979,7 +979,7 @@
                 </div>
                 <div class="modal-header-actions">
                     <button type="button" class="btn btn-secondary btn-sm" onclick="closeModal('vinylFormModal')">Annuller</button>
-                    <button type="submit" form="vinylForm" class="btn btn-primary btn-sm" style="font-weight:700;">
+                    <button type="button" class="btn btn-primary btn-sm" onclick="saveVinylForm(event)" style="font-weight:700;">
                         <i data-lucide="check"></i> Gem
                     </button>
                 </div>
@@ -1168,7 +1168,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('vinylFormModal')">Annuller</button>
-                    <button type="submit" class="btn btn-primary" style="font-weight:700;">
+                    <button type="button" class="btn btn-primary" onclick="saveVinylForm(event)" style="font-weight:700;">
                         <i data-lucide="check"></i> Gem LP i Samlingen
                     </button>
                 </div>
@@ -1467,14 +1467,26 @@
             });
         }
 
+        function sanitizeForFirestore(obj) {
+            if (obj === undefined) return null;
+            if (obj === null || typeof obj !== 'object') return obj;
+            if (Array.isArray(obj)) return obj.map(sanitizeForFirestore);
+            const clean = {};
+            for (const [key, value] of Object.entries(obj)) {
+                clean[key] = value === undefined ? null : sanitizeForFirestore(value);
+            }
+            return clean;
+        }
+
         function normalizeVinylForCloud(vinyl) {
             const copy = structuredClone ? structuredClone(vinyl) : JSON.parse(JSON.stringify(vinyl));
             if (!copy.cloud_id) {
                 copy.cloud_id = (crypto && crypto.randomUUID) ? crypto.randomUUID() : `vinyl_${Date.now()}_${Math.random().toString(16).slice(2)}`;
             }
+            delete copy.id; // Lad IndexedDB styre lokale tal-id'er
             copy.synced_by = DEVICE_ID;
             copy.synced_at_local = new Date().toISOString();
-            return copy;
+            return sanitizeForFirestore(copy);
         }
 
         async function initFirebaseSync() {
@@ -2066,64 +2078,81 @@
         }
 
         async function saveVinylForm(e) {
-            e.preventDefault();
-            const id = document.getElementById('formVinylId').value;
+            if (e && e.preventDefault) e.preventDefault();
             
-            const trackRows = document.querySelectorAll('#tracklistContainer .track-row');
-            const tracks = [];
-            trackRows.forEach(row => {
-                const title = row.querySelector('.track-title').value.trim();
-                if (title) {
-                    tracks.push({
-                        position: row.querySelector('.track-pos').value.trim(),
-                        title: title,
-                        duration: row.querySelector('.track-dur').value.trim(),
-                        rating: parseInt(row.querySelector('.track-rating')?.value) || 0
-                    });
+            const artistInput = document.getElementById('formArtist');
+            const titleInput = document.getElementById('formTitle');
+            if (!artistInput || !titleInput || !artistInput.value.trim() || !titleInput.value.trim()) {
+                alert('Udfyld venligst både Kunstner og Album Titel.');
+                return;
+            }
+
+            try {
+                const id = document.getElementById('formVinylId').value;
+                
+                const trackRows = document.querySelectorAll('#tracklistContainer .track-row');
+                const tracks = [];
+                trackRows.forEach(row => {
+                    const title = row.querySelector('.track-title')?.value?.trim();
+                    if (title) {
+                        tracks.push({
+                            position: row.querySelector('.track-pos')?.value?.trim() || '',
+                            title: title,
+                            duration: row.querySelector('.track-dur')?.value?.trim() || '',
+                            rating: parseInt(row.querySelector('.track-rating')?.value) || 0
+                        });
+                    }
+                });
+
+                const data = {
+                    artist: artistInput.value.trim(),
+                    title: titleInput.value.trim(),
+                    release_year: parseInt(document.getElementById('formYear').value) || null,
+                    genre: document.getElementById('formGenre').value.split(',').map(s=>s.trim()).filter(Boolean),
+                    label: document.getElementById('formLabel').value.trim(),
+                    catalog_no: document.getElementById('formCatNo').value.trim(),
+                    format_details: document.getElementById('formFormat').value.trim(),
+                    speed: document.getElementById('formSpeed').value || '33 ⅓ RPM',
+                    discogs_id: parseInt(document.getElementById('formDiscogsId').value) || null,
+                    discogs_url: document.getElementById('formDiscogsUrl').value || '',
+                    discogs_price_low: parseFloat(document.getElementById('formDiscogsPriceLow').value) || null,
+                    discogs_price_med: parseFloat(document.getElementById('formDiscogsPriceMed').value) || null,
+                    discogs_price_high: parseFloat(document.getElementById('formDiscogsPriceHigh').value) || null,
+                    media_condition: document.getElementById('formMediaCondition').value || 'VG+',
+                    sleeve_condition: document.getElementById('formSleeveCondition').value || 'VG+',
+                    music_rating: parseFloat(document.getElementById('formMusicRating').value) || 0,
+                    favorite_side: document.getElementById('formFavoriteSide').value || '',
+                    purchase_price: parseFloat(document.getElementById('formPurchasePrice').value) || null,
+                    estimated_value: parseFloat(document.getElementById('formEstimatedValue').value) || null,
+                    condition_notes: document.getElementById('formConditionNotes').value.trim(),
+                    notes: document.getElementById('formNotes').value.trim(),
+                    favorite: Boolean(document.getElementById('formFavorite').checked),
+                    custom_cover: capturedCover || '',
+                    tracks: tracks
+                };
+
+                let savedId = id ? parseInt(id) : null;
+                if (savedId) {
+                    await updateVinylInDB(savedId, data);
+                } else {
+                    savedId = await addVinylToDB(data);
                 }
-            });
 
-            const data = {
-                artist: document.getElementById('formArtist').value.trim(),
-                title: document.getElementById('formTitle').value.trim(),
-                release_year: parseInt(document.getElementById('formYear').value) || null,
-                genre: document.getElementById('formGenre').value.split(',').map(s=>s.trim()).filter(Boolean),
-                label: document.getElementById('formLabel').value.trim(),
-                catalog_no: document.getElementById('formCatNo').value.trim(),
-                format_details: document.getElementById('formFormat').value.trim(),
-                speed: document.getElementById('formSpeed').value,
-                discogs_id: parseInt(document.getElementById('formDiscogsId').value) || null,
-                discogs_url: document.getElementById('formDiscogsUrl').value || '',
-                discogs_price_low: parseFloat(document.getElementById('formDiscogsPriceLow').value) || null,
-                discogs_price_med: parseFloat(document.getElementById('formDiscogsPriceMed').value) || null,
-                discogs_price_high: parseFloat(document.getElementById('formDiscogsPriceHigh').value) || null,
-                media_condition: document.getElementById('formMediaCondition').value,
-                sleeve_condition: document.getElementById('formSleeveCondition').value,
-                music_rating: parseFloat(document.getElementById('formMusicRating').value) || 0,
-                favorite_side: document.getElementById('formFavoriteSide').value,
-                purchase_price: parseFloat(document.getElementById('formPurchasePrice').value) || null,
-                estimated_value: parseFloat(document.getElementById('formEstimatedValue').value) || null,
-                condition_notes: document.getElementById('formConditionNotes').value.trim(),
-                notes: document.getElementById('formNotes').value.trim(),
-                favorite: document.getElementById('formFavorite').checked,
-                custom_cover: capturedCover,
-                tracks: tracks
-            };
+                // Luk modal og opdater UI med det samme så der er 0ms lag
+                closeModal('vinylFormModal');
+                await loadVinyls();
 
-            if (id) {
-                await updateVinylInDB(parseInt(id), data);
-            } else {
-                await addVinylToDB(data);
+                // Baggrunds-synkronisering til Firebase Firestore (hvis aktiveret)
+                if (cloudSyncReady && firestore) {
+                    const all = await getAllVinylsFromDB();
+                    const recordToPush = all.find(v => v.id === savedId) || { id: savedId, ...data };
+                    pushVinylToCloud(recordToPush).catch(err => console.warn('Baggrunds-synk til skyen advarsel:', err));
+                }
+
+            } catch (err) {
+                console.error('Fejl ved lagring af vinyl:', err);
+                alert('Der opstod en fejl under gemning: ' + err.message);
             }
-
-            if (cloudSyncReady) {
-                const latestList = await getAllVinylsFromDB();
-                const saved = id ? latestList.find(v => v.id === parseInt(id)) : latestList[latestList.length - 1];
-                if (saved) await pushVinylToCloud(saved);
-            }
-
-            closeModal('vinylFormModal');
-            loadVinyls();
         }
 
         function editVinyl(id) {
