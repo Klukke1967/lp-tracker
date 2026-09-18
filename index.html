@@ -20,6 +20,10 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     
+    <!-- Firebase SDKs (v10 compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    
     <style>
         :root {
             --bg-main: #f0f7f7;
@@ -816,7 +820,9 @@
                 <div>
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
                         <span class="brand-title">Vinyl Vault</span>
-                        <span class="brand-badge">Discogs Live</span>
+                        <span class="brand-badge" id="cloudStatusBadge" style="display:flex; align-items:center; gap:3px;">
+                            ☁️ Sky-synkroniseret
+                        </span>
                     </div>
                 </div>
             </a>
@@ -1251,16 +1257,37 @@
     <!-- PWA Storage & Client Script -->
     <script>
         const DB_NAME = 'VinylVaultDB';
-        const DB_VERSION = 1;
+        const DB_VERSION = 2;
         let db = null;
         let currentVinyls = [];
         let activeVinyl = null;
         let currentView = 'grid';
         let mediaStream = null;
         let capturedCover = '';
+
+        const FIREBASE_CONFIG = {
+            apiKey: "AIzaSyCPAcYEqhL7FwGs4fDkhGZ4NZ8tlN6QBvk",
+            authDomain: "vinyl-vault-aeb8e.firebaseapp.com",
+            projectId: "vinyl-vault-aeb8e",
+            storageBucket: "vinyl-vault-aeb8e.firebasestorage.app",
+            messagingSenderId: "998424028679",
+            appId: "1:998424028679:web:08dbf1fd19b416d21e6ca2",
+            measurementId: "G-72FLS200V4"
+        };
         const DEFAULT_DISCOGS_TOKEN = 'XBSDPpWpyZiSUmOInGQtwFRZvoGKmmVWxlTPlwZP';
         let userDiscogsToken = DEFAULT_DISCOGS_TOKEN;
         const EUR_TO_DKK = 7.46;
+        const CLOUD_COLLECTION = 'vinyls';
+        let firebaseApp = null;
+        let firestore = null;
+        let cloudSyncReady = false;
+        let cloudListener = null;
+        const DEVICE_ID_KEY = 'vinyl_vault_device_id';
+        const DEVICE_ID = localStorage.getItem(DEVICE_ID_KEY) || (() => {
+            const id = (crypto && crypto.randomUUID) ? crypto.randomUUID() : `dev_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+            localStorage.setItem(DEVICE_ID_KEY, id);
+            return id;
+        })();
 
         // Goldmine Grading Scale Definition & Market Multipliers
         const GRADING_SCALE = {
@@ -1282,6 +1309,12 @@
                     if (!database.objectStoreNames.contains('vinyls')) {
                         const store = database.createObjectStore('vinyls', { keyPath: 'id', autoIncrement: true });
                         store.createIndex('artist', 'artist', { unique: false });
+                        store.createIndex('cloud_id', 'cloud_id', { unique: false });
+                    } else {
+                        const store = req.transaction.objectStore('vinyls');
+                        if (!store.indexNames.contains('cloud_id')) {
+                            store.createIndex('cloud_id', 'cloud_id', { unique: false });
+                        }
                     }
                     if (!database.objectStoreNames.contains('settings')) {
                         database.createObjectStore('settings', { keyPath: 'key' });
@@ -1434,20 +1467,147 @@
             });
         }
 
-        function deleteVinylFromDB(id) {
-            return new Promise((resolve) => {
-                const tx = db.transaction('vinyls', 'readwrite');
-                tx.objectStore('vinyls').delete(id);
-                tx.oncomplete = () => resolve(true);
+        function normalizeVinylForCloud(vinyl) {
+            const copy = structuredClone ? structuredClone(vinyl) : JSON.parse(JSON.stringify(vinyl));
+            if (!copy.cloud_id) {
+                copy.cloud_id = (crypto && crypto.randomUUID) ? crypto.randomUUID() : `vinyl_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+            }
+            copy.synced_by = DEVICE_ID;
+            copy.synced_at_local = new Date().toISOString();
+            return copy;
+        }
+
+        async function initFirebaseSync() {
+            if (!window.firebase || !window.firebase.initializeApp || !window.firebase.firestore) {
+                setCloudBadge(false, 'Kun lokal lagring');
+                return false;
+            }
+
+            try {
+                if (!firebase.apps.length) {
+                    firebaseApp = firebase.initializeApp(FIREBASE_CONFIG);
+                } else {
+                    firebaseApp = firebase.app();
+                }
+                firestore = firebase.firestore(firebaseApp);
+                cloudSyncReady = true;
+                setCloudBadge(true, 'Sky-synk klar');
+                return true;
+            } catch (err) {
+                console.warn('Firebase init fejlede', err);
+                cloudSyncReady = false;
+                setCloudBadge(false, 'Kun lokal lagring');
+                return false;
+            }
+        }
+
+        function setCloudBadge(online, text) {
+            const badge = document.getElementById('cloudStatusBadge');
+            if (!badge) return;
+            badge.textContent = online ? `☁️ ${text}` : `○ ${text}`;
+            badge.style.opacity = online ? '1' : '0.75';
+            badge.style.background = online ? 'rgba(34, 197, 94, 0.14)' : 'rgba(96, 165, 250, 0.14)';
+            badge.style.color = online ? '#166534' : '#1d4ed8';
+        }
+
+        async function loadCloudVinylsIntoLocal() {
+            if (!cloudSyncReady || !firestore) return 0;
+            const snap = await firestore.collection(CLOUD_COLLECTION).get();
+            const remote = [];
+            snap.forEach(doc => remote.push({ id: doc.id, ...doc.data() }));
+            if (!remote.length) return 0;
+
+            const local = await getAllVinylsFromDB();
+            const byCloudId = new Map(local.filter(v => v.cloud_id).map(v => [v.cloud_id, v]));
+            const byKey = new Map(local.map(v => [`${(v.artist || '').toLowerCase()}|${(v.title || '').toLowerCase()}|${v.release_year || ''}|${(v.catalog_no || '').toLowerCase()}`, v]));
+
+            for (const item of remote) {
+                const payload = { ...item };
+                delete payload.id;
+                delete payload.synced_at;
+                const existing = byCloudId.get(item.id) || byKey.get(`${(item.artist || '').toLowerCase()}|${(item.title || '').toLowerCase()}|${item.release_year || ''}|${(item.catalog_no || '').toLowerCase()}`);
+                if (existing) {
+                    const merged = { ...existing, ...payload, cloud_id: item.id };
+                    await updateVinylInDB(existing.id, merged);
+                } else {
+                    await addVinylToDB({ ...payload, cloud_id: item.id });
+                }
+            }
+            return remote.length;
+        }
+
+        async function pushVinylToCloud(vinyl) {
+            if (!cloudSyncReady || !firestore) return false;
+            const payload = normalizeVinylForCloud(vinyl);
+            await firestore.collection(CLOUD_COLLECTION).doc(payload.cloud_id).set({
+                ...payload,
+                synced_at: firebase.firestore.FieldValue.serverTimestamp(),
+                synced_device: DEVICE_ID
+            }, { merge: true });
+            if (!vinyl.cloud_id) {
+                await updateVinylInDB(vinyl.id, { ...vinyl, cloud_id: payload.cloud_id });
+            }
+            return true;
+        }
+
+        async function removeVinylFromCloud(vinyl) {
+            if (!cloudSyncReady || !firestore || !vinyl?.cloud_id) return false;
+            await firestore.collection(CLOUD_COLLECTION).doc(vinyl.cloud_id).delete();
+            return true;
+        }
+
+        async function syncAllLocalVinylsToCloud() {
+            if (!cloudSyncReady || !firestore) return 0;
+            const list = await getAllVinylsFromDB();
+            let pushed = 0;
+            for (const vinyl of list) {
+                await pushVinylToCloud(vinyl);
+                pushed += 1;
+            }
+            return pushed;
+        }
+
+        async function startCloudRealtimeListener() {
+            if (!cloudSyncReady || !firestore) return;
+            if (cloudListener) {
+                cloudListener();
+                cloudListener = null;
+            }
+            cloudListener = firestore.collection(CLOUD_COLLECTION).onSnapshot(async (snapshot) => {
+                for (const change of snapshot.docChanges()) {
+                    const remote = { cloud_id: change.doc.id, ...change.doc.data() };
+                    const localList = await getAllVinylsFromDB();
+                    const local = localList.find(v => v.cloud_id === remote.cloud_id) || localList.find(v => `${(v.artist || '').toLowerCase()}|${(v.title || '').toLowerCase()}|${v.release_year || ''}|${(v.catalog_no || '').toLowerCase()}` === `${(remote.artist || '').toLowerCase()}|${(remote.title || '').toLowerCase()}|${remote.release_year || ''}|${(remote.catalog_no || '').toLowerCase()}`);
+                    if (change.type === 'removed') {
+                        if (local) await deleteVinylFromDB(local.id);
+                        continue;
+                    }
+                    if (local) {
+                        await updateVinylInDB(local.id, { ...local, ...remote, cloud_id: remote.cloud_id });
+                    } else {
+                        await addVinylToDB(remote);
+                    }
+                }
+                loadVinyls();
             });
         }
 
-        // App Initialization
         document.addEventListener('DOMContentLoaded', async () => {
             await initIndexedDB();
+            await initFirebaseSync();
             await loadStoredSettings();
-            await seedInitialDataIfEmpty();
+
+            const cloudCount = cloudSyncReady ? await loadCloudVinylsIntoLocal() : 0;
+            const localCount = await getVinylCount();
+            if (localCount === 0 && cloudCount === 0) {
+                await seedInitialDataIfEmpty();
+            }
+
             setupEventListeners();
+            if (cloudSyncReady) {
+                await syncAllLocalVinylsToCloud();
+                await startCloudRealtimeListener();
+            }
             loadVinyls();
             
             if ('serviceWorker' in navigator) {
@@ -1956,6 +2116,12 @@
                 await addVinylToDB(data);
             }
 
+            if (cloudSyncReady) {
+                const latestList = await getAllVinylsFromDB();
+                const saved = id ? latestList.find(v => v.id === parseInt(id)) : latestList[latestList.length - 1];
+                if (saved) await pushVinylToCloud(saved);
+            }
+
             closeModal('vinylFormModal');
             loadVinyls();
         }
@@ -1968,6 +2134,8 @@
 
         async function deleteVinyl(id) {
             if (!confirm('Vil du slette denne plade fra samlingen?')) return;
+            const v = currentVinyls.find(item => item.id === id);
+            if (v) await removeVinylFromCloud(v);
             await deleteVinylFromDB(id);
             closeModal('vinylDetailsModal');
             loadVinyls();
@@ -2023,35 +2191,57 @@
             reader.readAsDataURL(file);
         }
 
-        // --- DISCOGS ROBUST MULTI-FALLBACK API INTEGRATION ---
+        // --- DISCOGS ROBUST DIRECT & FALLBACK API INTEGRATION ---
 
         async function fetchDiscogsProxy(targetUrl) {
             let finalUrl = targetUrl;
-            if (userDiscogsToken && !finalUrl.includes('token=')) {
-                finalUrl += (finalUrl.includes('?') ? '&' : '?') + `token=${encodeURIComponent(userDiscogsToken.trim())}`;
+            const token = (userDiscogsToken || DEFAULT_DISCOGS_TOKEN).trim();
+            if (token && !finalUrl.includes('token=')) {
+                finalUrl += (finalUrl.includes('?') ? '&' : '?') + `token=${encodeURIComponent(token)}`;
             }
 
-            const proxies = [
-                `https://corsproxy.io/?url=${encodeURIComponent(finalUrl)}`,
+            // 1. Forsøg direkte kald til Discogs API (Discogs v2 understøtter CORS med token)
+            try {
+                const directResp = await fetch(finalUrl, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (directResp.ok) {
+                    const data = await directResp.json();
+                    return data;
+                }
+            } catch (directErr) {
+                console.warn('Direkte Discogs kald fejlede, prøver fallback...', directErr);
+            }
+
+            // 2. Fallback proxies hvis browser/netværk kræver proxy
+            const fallbackProxies = [
                 `https://api.allorigins.win/raw?url=${encodeURIComponent(finalUrl)}`,
-                `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(finalUrl)}`
+                `https://corsproxy.io/?url=${encodeURIComponent(finalUrl)}`
             ];
 
             let lastErr = null;
-            for (const proxy of proxies) {
+            for (const proxy of fallbackProxies) {
                 try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 6000);
                     const resp = await fetch(proxy, {
+                        signal: controller.signal,
                         headers: { 'Accept': 'application/json' }
                     });
+                    clearTimeout(timeoutId);
                     if (resp.ok) {
-                        const data = await resp.json();
-                        return data;
+                        const contentType = resp.headers.get('content-type') || '';
+                        if (contentType.includes('application/json') || contentType.includes('text/plain')) {
+                            const data = await resp.json();
+                            if (data && typeof data === 'object') return data;
+                        }
                     }
                 } catch (e) {
                     lastErr = e;
                 }
             }
-            throw lastErr || new Error('Kunne ikke nå Discogs API');
+            throw lastErr || new Error('Kunne ikke nå Discogs API. Tjek dit internet eller token.');
         }
 
         function openDiscogsModal() {
