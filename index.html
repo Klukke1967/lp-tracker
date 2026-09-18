@@ -1467,6 +1467,22 @@
             });
         }
 
+        function deleteVinylFromDB(id) {
+            return new Promise((resolve) => {
+                if (!db) return resolve(false);
+                try {
+                    const tx = db.transaction('vinyls', 'readwrite');
+                    const store = tx.objectStore('vinyls');
+                    const numericId = typeof id === 'string' && !isNaN(Number(id)) ? Number(id) : id;
+                    store.delete(numericId);
+                    tx.oncomplete = () => resolve(true);
+                    tx.onerror = () => resolve(false);
+                } catch (e) {
+                    resolve(false);
+                }
+            });
+        }
+
         function sanitizeForFirestore(obj) {
             if (obj === undefined) return null;
             if (obj === null || typeof obj !== 'object') return obj;
@@ -2163,11 +2179,19 @@
 
         async function deleteVinyl(id) {
             if (!confirm('Vil du slette denne plade fra samlingen?')) return;
-            const v = currentVinyls.find(item => item.id === id);
-            if (v) await removeVinylFromCloud(v);
-            await deleteVinylFromDB(id);
-            closeModal('vinylDetailsModal');
-            loadVinyls();
+            try {
+                const numericId = typeof id === 'string' && !isNaN(Number(id)) ? Number(id) : id;
+                const v = currentVinyls.find(item => item.id == numericId || item.id == id);
+                if (v && cloudSyncReady && firestore) {
+                    removeVinylFromCloud(v).catch(e => console.warn('Cloud delete error:', e));
+                }
+                await deleteVinylFromDB(numericId);
+                closeModal('vinylDetailsModal');
+                await loadVinyls();
+            } catch (err) {
+                console.error('Fejl ved sletning:', err);
+                alert('Der opstod en fejl ved sletning: ' + err.message);
+            }
         }
 
         // Camera Live
