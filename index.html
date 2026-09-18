@@ -1447,13 +1447,19 @@
 
         function updateVinylInDB(id, data) {
             return new Promise((resolve, reject) => {
-                const tx = db.transaction('vinyls', 'readwrite');
-                const store = tx.objectStore('vinyls');
-                data.id = id;
-                data.updated_at = new Date().toISOString();
-                const req = store.put(data);
-                req.onsuccess = () => resolve(req.result);
-                req.onerror = (e) => reject(e);
+                if (!db) return resolve(false);
+                try {
+                    const tx = db.transaction('vinyls', 'readwrite');
+                    const store = tx.objectStore('vinyls');
+                    const numericId = typeof id === 'string' && !isNaN(Number(id)) ? Number(id) : id;
+                    data.id = numericId;
+                    data.updated_at = new Date().toISOString();
+                    const req = store.put(data);
+                    req.onsuccess = () => resolve(req.result);
+                    req.onerror = (e) => reject(e);
+                } catch (err) {
+                    reject(err);
+                }
             });
         }
 
@@ -1918,11 +1924,14 @@
 
                         ${discogsPriceHtml}
 
-                        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.85rem; padding:0.5rem 0.75rem; background:white; border:1px solid var(--border-color); border-radius:var(--radius-md);">
-                            <span style="font-weight:700; font-size:0.85rem;">Musikkens Vurdering:</span>
-                            <div class="star-rating" style="font-size:1.15rem;">
-                                ${renderStars(v.music_rating || 0)}
-                                <span style="font-size:0.85rem; font-weight:700; color:var(--text-muted); margin-left:0.4rem;">${v.music_rating || 0}/5</span>
+                        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.85rem; padding:0.6rem 0.85rem; background:white; border:1px solid var(--border-color); border-radius:var(--radius-md); box-shadow:var(--shadow-sm);">
+                            <div>
+                                <div style="font-weight:700; font-size:0.85rem; color:var(--text-main);">Musikkens Vurdering:</div>
+                                <div style="font-size:0.72rem; color:var(--text-muted);">Klik på stjernerne for at rate</div>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:0.5rem;">
+                                ${renderInteractiveAlbumStars(v.music_rating || 0)}
+                                <span style="font-size:0.9rem; font-weight:800; color:var(--text-main); min-width:32px; text-align:right;">${v.music_rating || 0}/5</span>
                             </div>
                         </div>
 
@@ -1943,17 +1952,45 @@
             lucide.createIcons();
         }
 
+        function renderInteractiveAlbumStars(rating) {
+            let out = '<div style="display:inline-flex; gap:3px; cursor:pointer;" title="Klik for at ændre rating">';
+            for (let i = 1; i <= 5; i++) {
+                const active = (rating || 0) >= i;
+                out += `<span onclick="rateActiveAlbum(${i})" style="color:${active ? '#f59e0b' : '#cbd5e1'}; font-size:1.4rem; line-height:1; user-select:none; transition:transform 0.12s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">★</span>`;
+            }
+            out += '</div>';
+            return out;
+        }
+
+        async function rateActiveAlbum(stars) {
+            if (!activeVinyl) return;
+            const cur = activeVinyl.music_rating || 0;
+            activeVinyl.music_rating = (cur === stars) ? 0 : stars;
+            await updateVinylInDB(activeVinyl.id, activeVinyl);
+            if (cloudSyncReady && firestore) {
+                pushVinylToCloud(activeVinyl).catch(e => console.warn('Cloud rate sync:', e));
+            }
+            await loadVinyls();
+            openVinylDetails(activeVinyl.id);
+        }
+
         function renderTrackStars(r) {
-            let out = '';
-            for (let i = 1; i <= 5; i++) out += i <= r ? '★' : '☆';
+            let out = '<span style="display:inline-flex; gap:1px; font-size:0.95rem; user-select:none;" title="Klik for at skifte stjerner">';
+            for (let i = 1; i <= 5; i++) {
+                out += `<span style="color:${i <= r ? '#f59e0b' : '#cbd5e1'};">★</span>`;
+            }
+            out += '</span>';
             return out;
         }
 
         async function quickRateTrack(idx) {
             if (!activeVinyl || !activeVinyl.tracks) return;
             const cur = activeVinyl.tracks[idx].rating || 0;
-            activeVinyl.tracks[idx].rating = cur === 5 ? 0 : cur + 1;
+            activeVinyl.tracks[idx].rating = cur >= 5 ? 0 : (cur + 1);
             await updateVinylInDB(activeVinyl.id, activeVinyl);
+            if (cloudSyncReady && firestore) {
+                pushVinylToCloud(activeVinyl).catch(e => console.warn('Cloud track rate sync:', e));
+            }
             openVinylDetails(activeVinyl.id);
         }
 
@@ -1961,6 +1998,9 @@
             if (!activeVinyl || !activeVinyl.tracks) return;
             activeVinyl.tracks[idx].is_favorite = !activeVinyl.tracks[idx].is_favorite;
             await updateVinylInDB(activeVinyl.id, activeVinyl);
+            if (cloudSyncReady && firestore) {
+                pushVinylToCloud(activeVinyl).catch(e => console.warn('Cloud fav sync:', e));
+            }
             openVinylDetails(activeVinyl.id);
         }
 
@@ -2084,8 +2124,12 @@
                 <input type="text" placeholder="Pos" value="${pos}" class="form-input track-pos" style="padding:0.35rem; text-align:center;">
                 <input type="text" placeholder="Sangtitel" value="${escapeHtml(title)}" class="form-input track-title" style="padding:0.35rem;">
                 <input type="text" placeholder="Tid" value="${dur}" class="form-input track-dur" style="padding:0.35rem; text-align:center;">
-                <select class="form-select track-rating" style="padding:0.35rem;">
+                <select class="form-select track-rating" style="padding:0.35rem; width:80px;">
                     <option value="0" ${rat==0?'selected':''}>0 ★</option>
+                    <option value="1" ${rat==1?'selected':''}>1 ★</option>
+                    <option value="2" ${rat==2?'selected':''}>2 ★</option>
+                    <option value="3" ${rat==3?'selected':''}>3 ★</option>
+                    <option value="4" ${rat==4?'selected':''}>4 ★</option>
                     <option value="5" ${rat==5?'selected':''}>5 ★</option>
                 </select>
                 <button type="button" class="btn btn-danger btn-icon-only" onclick="this.parentElement.remove()" style="padding:0.35rem;">✕</button>
