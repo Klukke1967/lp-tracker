@@ -1535,6 +1535,25 @@
             badge.style.color = online ? '#166534' : '#1d4ed8';
         }
 
+        function deduplicateVinyls(list) {
+            const seenIds = new Set();
+            const seenContent = new Set();
+            const result = [];
+            for (const v of list) {
+                if (!v) continue;
+                const idKey = v.id ? String(v.id) : null;
+                const contentKey = `${(v.artist||'').trim().toLowerCase()}:::${(v.title||'').trim().toLowerCase()}:::${(v.release_year||'')}:::${(v.catalog_no||'').trim().toLowerCase()}`;
+                
+                if (idKey && seenIds.has(idKey)) continue;
+                if (seenContent.has(contentKey)) continue;
+                
+                if (idKey) seenIds.add(idKey);
+                seenContent.add(contentKey);
+                result.push(v);
+            }
+            return result;
+        }
+
         async function mirrorToLocalDB(list) {
             if (!db) return;
             try {
@@ -1556,8 +1575,8 @@
                 snapshot.forEach(doc => {
                     list.push({ id: doc.id, ...doc.data() });
                 });
-                masterVinylList = list;
-                mirrorToLocalDB(list);
+                masterVinylList = deduplicateVinyls(list);
+                mirrorToLocalDB(masterVinylList);
                 loadVinyls();
             }, (err) => {
                 console.warn('Firestore realtime listener:', err);
@@ -1571,7 +1590,9 @@
                     const clean = sanitizeForFirestore(data);
                     const docRef = await firestore.collection(CLOUD_COLLECTION).add(clean);
                     data.id = docRef.id;
-                    masterVinylList.push(data);
+                    if (!masterVinylList.some(v => v.id === docRef.id)) {
+                        masterVinylList.push(data);
+                    }
                     return docRef.id;
                 } catch (err) {
                     console.warn('Firestore add fejl, gemmer lokalt:', err);
@@ -1579,7 +1600,9 @@
             }
             const localId = await addVinylToDB(data);
             data.id = localId;
-            masterVinylList.push(data);
+            if (!masterVinylList.some(v => v.id === localId)) {
+                masterVinylList.push(data);
+            }
             return localId;
         }
 
@@ -1669,6 +1692,7 @@
 
         async function loadVinyls() {
             let list = masterVinylList.length > 0 ? [...masterVinylList] : await getAllVinylsFromDB();
+            list = deduplicateVinyls(list);
             masterVinylList = list;
             
             // Stats
