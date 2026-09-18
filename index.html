@@ -10,7 +10,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon.svg">
     
-    <title>Vinyl Vault - LP Tracker</title>
+    <title>Vinyl Vault - LP Tracker & Discogs Priser</title>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -72,7 +72,7 @@
         }
 
         .header {
-            background: rgba(255, 255, 255, 0.88);
+            background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border-color);
@@ -131,7 +131,7 @@
             text-transform: uppercase;
         }
 
-        .nav-actions { display: flex; align-items: center; gap: 0.6rem; }
+        .nav-actions { display: flex; align-items: center; gap: 0.55rem; }
 
         .btn {
             display: inline-flex;
@@ -141,7 +141,7 @@
             font-family: var(--font-body);
             font-weight: 600;
             font-size: 0.88rem;
-            padding: 0.55rem 1rem;
+            padding: 0.55rem 0.95rem;
             border-radius: var(--radius-md);
             cursor: pointer;
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -165,6 +165,7 @@
         .btn-danger { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
         .btn-danger:hover { background: #dc2626; color: white; }
 
+        .btn-sm { padding: 0.35rem 0.65rem; font-size: 0.8rem; border-radius: var(--radius-sm); }
         .btn-icon-only { padding: 0.55rem; border-radius: var(--radius-md); }
 
         .main-container {
@@ -243,9 +244,7 @@
         .player-banner::before {
             content: '';
             position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
+            left: 0; top: 0; bottom: 0;
             width: 5px;
             background: var(--primary-gradient);
             border-radius: 4px 0 0 4px;
@@ -268,11 +267,9 @@
 
         .spinning-vinyl .label-art {
             position: absolute;
-            top: 50%;
-            left: 50%;
+            top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width: 28px;
-            height: 28px;
+            width: 28px; height: 28px;
             border-radius: 50%;
             object-fit: cover;
             border: 1px solid white;
@@ -301,8 +298,7 @@
 
         .search-input-wrap svg {
             position: absolute;
-            left: 0.85rem;
-            top: 50%;
+            left: 0.85rem; top: 50%;
             transform: translateY(-50%);
             color: var(--text-light);
             pointer-events: none;
@@ -406,20 +402,16 @@
 
         .cover-img {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             object-fit: cover;
         }
 
         .vinyl-peek {
             position: absolute;
-            right: -15px;
-            top: 50%;
+            right: -15px; top: 50%;
             transform: translateY(-50%) rotate(0deg);
-            width: 80%;
-            height: 80%;
+            width: 80%; height: 80%;
             border-radius: 50%;
             background: radial-gradient(circle, #2d3748 0%, #1a202c 60%, #000000 100%);
             border: 2px solid #4a5568;
@@ -433,11 +425,9 @@
         .vinyl-peek::after {
             content: '';
             position: absolute;
-            top: 50%;
-            left: 50%;
+            top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width: 32%;
-            height: 32%;
+            width: 32%; height: 32%;
             border-radius: 50%;
             background: var(--primary-gradient);
             border: 2px solid white;
@@ -447,9 +437,7 @@
 
         .card-badges {
             position: absolute;
-            top: 0.6rem;
-            left: 0.6rem;
-            right: 0.6rem;
+            top: 0.6rem; left: 0.6rem; right: 0.6rem;
             display: flex;
             justify-content: space-between;
             z-index: 2;
@@ -553,8 +541,7 @@
         .vinyl-list-item:hover { border-color: var(--primary-light); background: var(--bg-card-subtle); }
 
         .list-thumb {
-            width: 54px;
-            height: 54px;
+            width: 54px; height: 54px;
             border-radius: var(--radius-sm);
             object-fit: cover;
             flex-shrink: 0;
@@ -583,7 +570,7 @@
             border: 1px solid var(--border-color);
             box-shadow: var(--shadow-xl);
             width: 100%;
-            max-width: 820px;
+            max-width: 840px;
             max-height: 90vh;
             max-height: 90dvh;
             display: flex;
@@ -655,6 +642,48 @@
             flex-shrink: 0;
         }
 
+        /* Discogs Price Box */
+        .discogs-price-box {
+            background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%);
+            border: 1px solid #bbf7d0;
+            border-radius: var(--radius-md);
+            padding: 0.85rem 1rem;
+            margin: 0.85rem 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .discogs-price-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .discogs-price-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .discogs-price-item {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 0.4rem 0.6rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid rgba(13, 148, 136, 0.15);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .discogs-price-item span { font-size: 0.72rem; color: var(--text-muted); }
+        .discogs-price-item strong { font-size: 0.95rem; color: var(--text-main); }
+
         /* Camera Preview */
         .camera-preview-box {
             position: relative;
@@ -690,7 +719,7 @@
             border: 1px solid var(--border-color);
             border-radius: var(--radius-md);
             font-family: var(--font-body);
-            font-size: 16px; /* 16px prevents iOS Safari auto-zoom on input focus */
+            font-size: 16px;
             background: var(--bg-card-subtle);
             color: var(--text-main);
             outline: none;
@@ -748,18 +777,9 @@
                 margin: 0;
             }
 
-            .modal-header {
-                padding: 0.75rem 1rem;
-            }
-
-            .modal-title {
-                font-size: 1.1rem;
-            }
-
-            .modal-body {
-                padding: 1rem;
-                padding-bottom: 3rem;
-            }
+            .modal-header { padding: 0.75rem 1rem; }
+            .modal-title { font-size: 1.1rem; }
+            .modal-body { padding: 1rem; padding-bottom: 3rem; }
 
             .modal-footer {
                 padding: 0.75rem 1rem;
@@ -768,10 +788,7 @@
                 box-shadow: 0 -3px 14px rgba(0, 0, 0, 0.08);
             }
 
-            .modal-footer .btn {
-                flex: 1;
-                justify-content: center;
-            }
+            .modal-footer .btn { flex: 1; justify-content: center; }
 
             .track-row {
                 display: flex;
@@ -799,17 +816,17 @@
                 <div>
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
                         <span class="brand-title">Vinyl Vault</span>
-                        <span class="brand-badge">PWA</span>
+                        <span class="brand-badge">Discogs Live</span>
                     </div>
                 </div>
             </a>
 
             <div class="nav-actions">
-                <button class="btn btn-secondary" id="btnSettings">
-                    <i data-lucide="settings"></i> Backup & API
+                <button class="btn btn-secondary" id="btnSettings" title="Backup og Discogs API Token">
+                    <i data-lucide="settings"></i> Backup & Token
                 </button>
-                <button class="btn btn-accent" id="btnSearchDiscogs">
-                    <i data-lucide="globe"></i> Discogs Søg
+                <button class="btn btn-accent" id="btnSearchDiscogs" title="Søg i Discogs Databasen & Markedspriser">
+                    <i data-lucide="search"></i> Discogs Pris-tjek
                 </button>
                 <button class="btn btn-primary" id="btnAddVinyl">
                     <i data-lucide="plus"></i> Tilføj LP
@@ -855,7 +872,7 @@
             <div class="stat-card">
                 <div class="stat-icon green"><i data-lucide="trending-up"></i></div>
                 <div class="stat-content">
-                    <div class="stat-label">Samlet Værdi</div>
+                    <div class="stat-label">Samlet Værdi (Discogs)</div>
                     <div class="stat-value" id="statTotalValue">0 kr</div>
                 </div>
             </div>
@@ -880,7 +897,7 @@
             <div class="search-row">
                 <div class="search-input-wrap">
                     <i data-lucide="search"></i>
-                    <input type="text" id="searchInput" class="search-input" placeholder="Søg kunstner, album, pladeselskab, katalognummer...">
+                    <input type="text" id="searchInput" class="search-input" placeholder="Søg i din samling efter artist, album, label, katnr...">
                 </div>
                 <div class="view-toggles">
                     <button class="view-btn active" id="viewGridBtn" title="Gitter"><i data-lucide="layout-grid"></i></button>
@@ -924,7 +941,7 @@
                         <option value="title-asc">Titel (A-Å)</option>
                         <option value="year-desc">Udgivelsesår (Nyeste)</option>
                         <option value="rating-desc">Højeste musikrating</option>
-                        <option value="value-desc">Højeste værdi</option>
+                        <option value="value-desc">Højeste værdi (Discogs)</option>
                         <option value="play_count-desc">Mest afspillet</option>
                     </select>
                 </div>
@@ -963,12 +980,21 @@
             </div>
             <form id="vinylForm" onsubmit="saveVinylForm(event)">
                 <input type="hidden" id="formVinylId">
+                <input type="hidden" id="formDiscogsId">
+                <input type="hidden" id="formDiscogsUrl">
+                <input type="hidden" id="formDiscogsPriceLow">
+                <input type="hidden" id="formDiscogsPriceMed">
+                <input type="hidden" id="formDiscogsPriceHigh">
+                
                 <div class="modal-body">
                     
                     <!-- Cover Capture -->
                     <div style="background: var(--bg-surface); padding: 1.1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 1.25rem;">
-                        <div style="font-weight: 700; font-size: 0.9rem; margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.5rem;">
-                            <i data-lucide="camera"></i> Cover Billede
+                        <div style="font-weight: 700; font-size: 0.9rem; margin-bottom: 0.6rem; display: flex; align-items: center; justify-content: space-between;">
+                            <span style="display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="camera"></i> Cover Billede</span>
+                            <button type="button" class="btn btn-accent btn-sm" onclick="openDiscogsSearchForForm()">
+                                <i data-lucide="globe"></i> Udfyld & find priser på Discogs
+                            </button>
                         </div>
                         <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
                             <img id="formCoverPreview" src="icon.svg" style="width: 80px; height: 80px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--border-color); display: none;">
@@ -1023,28 +1049,31 @@
                         </div>
                     </div>
 
-                    <!-- Discogs Grading -->
+                    <!-- Discogs Grading Section -->
                     <div style="background: var(--bg-surface); padding: 1.1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin: 1.25rem 0;">
-                        <div style="font-weight: 700; font-size: 0.85rem; color: var(--primary); margin-bottom: 0.75rem; text-transform: uppercase;">
-                            Stand Vurdering (Discogs Goldmine Grading)
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0.75rem;">
+                            <div style="font-weight: 700; font-size: 0.85rem; color: var(--primary); text-transform: uppercase;">
+                                Stand Vurdering (Discogs Goldmine Grading)
+                            </div>
+                            <span style="font-size:0.75rem; color:var(--text-muted);">Opdaterer automatisk Discogs pris</span>
                         </div>
                         <div class="form-grid">
                             <div class="form-group">
-                                <label class="form-label">Media Stand (Vinyl)</label>
-                                <select id="formMediaCondition" class="form-select">
-                                    <option value="M">Mint (M) - Perfekt / Uspillet</option>
-                                    <option value="NM" selected>Near Mint (NM) - Næsten som ny</option>
-                                    <option value="VG+">Very Good Plus (VG+) - Flot eksemplar</option>
-                                    <option value="VG">Very Good (VG) - Let støj i rolige stykker</option>
-                                    <option value="G+">Good Plus (G+) - Slidt, tydelig knitren</option>
-                                    <option value="G">Good (G) - Meget slidt</option>
+                                <label class="form-label">Media Stand (Selve Vinylen)</label>
+                                <select id="formMediaCondition" class="form-select" onchange="recalculateEstimatedPrice()">
+                                    <option value="M">Mint (M) - Perfekt / Uspillet (Toppris)</option>
+                                    <option value="NM" selected>Near Mint (NM) - Næsten som ny (+30%)</option>
+                                    <option value="VG+">Very Good Plus (VG+) - Flot eksemplar (Standard)</option>
+                                    <option value="VG">Very Good (VG) - Let støj / brugt (-40%)</option>
+                                    <option value="G+">Good Plus (G+) - Slidt, tydelig knitren (-60%)</option>
+                                    <option value="G">Good (G) - Meget slidt (-75%)</option>
                                     <option value="F">Fair (F) - Hårdt medtaget</option>
                                     <option value="P">Poor (P) - Defekt / Uspillelig</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label class="form-label">Sleeve Stand (Cover)</label>
-                                <select id="formSleeveCondition" class="form-select">
+                                <label class="form-label">Sleeve Stand (Coveret)</label>
+                                <select id="formSleeveCondition" class="form-select" onchange="recalculateEstimatedPrice()">
                                     <option value="M">Mint (M) - Perfekt stand</option>
                                     <option value="NM" selected>Near Mint (NM) - Næsten perfekt</option>
                                     <option value="VG+">Very Good Plus (VG+) - Pænt cover</option>
@@ -1054,8 +1083,25 @@
                                 </select>
                             </div>
                             <div class="form-group full-width">
-                                <label class="form-label">Standnoter (Matrix, Insert etc.)</label>
-                                <input type="text" id="formConditionNotes" class="form-input" placeholder="F.eks. Original inner sleeve medfølger, Matrix A-2">
+                                <label class="form-label">Standnoter (Matrix/Runout, Insert, Inner sleeve etc.)</label>
+                                <input type="text" id="formConditionNotes" class="form-input" placeholder="F.eks. Original inner sleeve medfølger, Matrix A-2 / B-2">
+                            </div>
+                        </div>
+
+                        <!-- Live Discogs Reference Price Box inside Form -->
+                        <div id="formDiscogsPriceBox" class="discogs-price-box" style="display:none; margin-top: 0.85rem;">
+                            <div class="discogs-price-header">
+                                <span>Discogs Markedspriser</span>
+                                <span id="formDiscogsMarketSource">Reference data</span>
+                            </div>
+                            <div class="discogs-price-grid">
+                                <div class="discogs-price-item"><span>Laveste (Low)</span><strong id="formPriceLowVal">-</strong></div>
+                                <div class="discogs-price-item"><span>Median (Gns)</span><strong id="formPriceMedVal" style="color:var(--accent-green);">-</strong></div>
+                                <div class="discogs-price-item"><span>Højeste (High)</span><strong id="formPriceHighVal">-</strong></div>
+                                <div class="discogs-price-item" style="background:#ccfbf1; border-color:var(--primary);">
+                                    <span>Vurderet for din stand:</span>
+                                    <strong id="formCalculatedPriceVal" style="color:var(--primary);">-</strong>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1086,11 +1132,11 @@
                         </div>
                         <div class="form-group">
                             <label class="form-label">Købspris (DKK)</label>
-                            <input type="number" step="0.5" id="formPurchasePrice" class="form-input" placeholder="150">
+                            <input type="number" step="0.5" id="formPurchasePrice" class="form-input" placeholder="Hvad gav du? (f.eks. 150)">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Estimeret Værdi (DKK)</label>
-                            <input type="number" step="0.5" id="formEstimatedValue" class="form-input" placeholder="250">
+                            <label class="form-label">Estimeret Værdi i DKK (Discogs Reference)</label>
+                            <input type="number" step="0.5" id="formEstimatedValue" class="form-input" placeholder="Beregnet ud fra stand">
                         </div>
                         <div class="form-group" style="display: flex; flex-direction: row; align-items: center; gap: 0.5rem; margin-top: 1.25rem;">
                             <input type="checkbox" id="formFavorite" style="width: 18px; height: 18px; accent-color: var(--primary);">
@@ -1110,7 +1156,7 @@
                     <!-- Notes -->
                     <div class="form-group">
                         <label class="form-label">Personlige Noter / Lytteoplevelse</label>
-                        <textarea id="formNotes" class="form-textarea" rows="2" placeholder="Skriv noter, lydoplevelse eller smagsnoter..."></textarea>
+                        <textarea id="formNotes" class="form-textarea" rows="2" placeholder="Skriv noter, lydoplevelse eller minder..."></textarea>
                     </div>
 
                 </div>
@@ -1134,7 +1180,7 @@
             <div class="modal-body" style="text-align: center;">
                 <div class="camera-preview-box">
                     <video id="camera-video" autoplay playsinline></video>
-                    <div class="camera-guide"><span style="color:white; background:rgba(0,0,0,0.6); padding:4px 8px; border-radius:4px; font-size:0.75rem;">Cover Ramme</span></div>
+                    <div class="camera-guide"><span style="color:white; background:rgba(0,0,0,0.6); padding:4px 8px; border-radius:4px; font-size:0.75rem;">Hold Coveret Her</span></div>
                 </div>
             </div>
             <div class="modal-footer" style="justify-content: center;">
@@ -1144,20 +1190,25 @@
         </div>
     </div>
 
-    <!-- MODAL: Discogs Search -->
+    <!-- MODAL: Discogs Live Search & Price Checker -->
     <div class="modal-backdrop" id="discogsModal">
         <div class="modal-container">
             <div class="modal-header">
-                <div class="modal-title"><i data-lucide="globe"></i> Søg på Discogs</div>
+                <div class="modal-title"><i data-lucide="globe"></i> Discogs Database & Pris-tjek</div>
                 <button class="btn btn-secondary btn-icon-only" onclick="closeModal('discogsModal')">✕</button>
             </div>
             <div class="modal-body">
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                    Brug dette opslag, når du står i pladebutikken eller scanner dine LP'er, for at se markedshistorik, tracklister og værdier.
+                </p>
                 <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
                     <input type="text" id="discogsSearchQuery" class="form-input" placeholder="Søg kunstner, album, katalognummer eller stregkode..." style="flex: 1;">
-                    <button class="btn btn-primary" onclick="runDiscogsSearch()"><i data-lucide="search"></i> Søg</button>
+                    <button class="btn btn-primary" onclick="runDiscogsSearch()"><i data-lucide="search"></i> Søg Discogs</button>
                 </div>
-                <div id="discogsResults" style="max-height: 400px; overflow-y: auto;">
-                    <div style="text-align: center; padding: 2rem; color: var(--text-muted);">Indtast søgeord ovenfor for at hente data fra Discogs.</div>
+                <div id="discogsResults" style="max-height: 440px; overflow-y: auto;">
+                    <div style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+                        Indtast søgeord eller stregkode for at hente data direkte fra Discogs.
+                    </div>
                 </div>
             </div>
         </div>
@@ -1167,17 +1218,23 @@
     <div class="modal-backdrop" id="settingsModal">
         <div class="modal-container" style="max-width: 540px;">
             <div class="modal-header">
-                <div class="modal-title"><i data-lucide="settings"></i> Backup & Indstillinger</div>
+                <div class="modal-title"><i data-lucide="settings"></i> Discogs API & Backup</div>
                 <button class="btn btn-secondary btn-icon-only" onclick="closeModal('settingsModal')">✕</button>
             </div>
             <div class="modal-body">
                 <div style="margin-bottom: 1.25rem;">
-                    <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.4rem; color: var(--primary);">Discogs API Token (Valgfrit)</h4>
-                    <input type="text" id="settingDiscogsToken" class="form-input" placeholder="Personligt token fra discogs.com/settings/developers">
+                    <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.4rem; color: var(--primary);">Discogs Personal Access Token</h4>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+                        Med dit gratis Discogs-token får du lynhurtig direkte adgang, højere rate-limits og adgang til markedspriser:
+                    </p>
+                    <input type="text" id="settingDiscogsToken" class="form-input" placeholder="Indsæt token fra discogs.com/settings/developers">
+                    <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.35rem;">
+                        👉 Hent dit gratis token på <a href="https://www.discogs.com/settings/developers" target="_blank" style="color:var(--accent-blue); font-weight:600;">discogs.com/settings/developers</a> (Tryk "Generate new token").
+                    </div>
                 </div>
                 <div style="border-top: 1px solid var(--border-color); padding-top: 1.1rem;">
                     <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.6rem; color: var(--primary);">Samling Sikkerhedskopi (JSON)</h4>
-                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.85rem;">Tag en komplet backup af din samling eller flyt den til en anden enhed.</p>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.85rem;">Tag en komplet backup af din samling eller synkroniser mellem mobil og computer.</p>
                     <div style="display: flex; gap: 0.6rem;">
                         <button type="button" class="btn btn-secondary" onclick="exportBackup()"><i data-lucide="download"></i> Download Backup</button>
                         <button type="button" class="btn btn-secondary" onclick="triggerImportBackup()"><i data-lucide="upload"></i> Importer Backup</button>
@@ -1185,14 +1242,14 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="saveSettings()">Gem</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('settingsModal')">Luk</button>
+                <button type="button" class="btn btn-primary" onclick="saveSettings()">Gem Indstillinger</button>
             </div>
         </div>
     </div>
 
     <!-- PWA Storage & Client Script -->
     <script>
-        // IndexedDB Simple Store
         const DB_NAME = 'VinylVaultDB';
         const DB_VERSION = 1;
         let db = null;
@@ -1201,16 +1258,19 @@
         let currentView = 'grid';
         let mediaStream = null;
         let capturedCover = '';
+        let userDiscogsToken = '';
+        const EUR_TO_DKK = 7.46;
 
+        // Goldmine Grading Scale Definition & Market Multipliers
         const GRADING_SCALE = {
-            'M': { name: 'Mint (M)', desc: 'Perfekt stand. Forseglet/uspillet.', badge: 'badge-mint' },
-            'NM': { name: 'Near Mint (NM)', desc: 'Næsten perfekt. Ingen synlige spor.', badge: 'badge-nm' },
-            'VG+': { name: 'Very Good Plus (VG+)', desc: 'Flot eksemplar. Ubetydelig overfladelyd.', badge: 'badge-vgplus' },
-            'VG': { name: 'Very Good (VG)', desc: 'Brugsspor, let knitren i stille passager.', badge: 'badge-vg' },
-            'G+': { name: 'Good Plus (G+)', desc: 'Slidt, knitren, men spiller igennem.', badge: 'badge-gplus' },
-            'G': { name: 'Good (G)', desc: 'Hårdt slidt, overfladestøj.', badge: 'badge-good' },
-            'F': { name: 'Fair (F)', desc: 'Meget slidt, kan hoppe.', badge: 'badge-fair' },
-            'P': { name: 'Poor (P)', desc: 'Uspillelig / ødelagt.', badge: 'badge-poor' }
+            'M': { name: 'Mint (M)', desc: 'Perfekt stand. Forseglet / uspillet.', badge: 'badge-mint', mult: 1.7 },
+            'NM': { name: 'Near Mint (NM)', desc: 'Næsten perfekt. Ingen synlige spor.', badge: 'badge-nm', mult: 1.3 },
+            'VG+': { name: 'Very Good Plus (VG+)', desc: 'Flot eksemplar. Ubetydelig overfladelyd.', badge: 'badge-vgplus', mult: 1.0 },
+            'VG': { name: 'Very Good (VG)', desc: 'Brugsspor, let knitren i rolige stykker.', badge: 'badge-vg', mult: 0.6 },
+            'G+': { name: 'Good Plus (G+)', desc: 'Tydeligt slidt, knitren, men hopper ikke.', badge: 'badge-gplus', mult: 0.4 },
+            'G': { name: 'Good (G)', desc: 'Hårdt slidt, overfladestøj.', badge: 'badge-good', mult: 0.25 },
+            'F': { name: 'Fair (F)', desc: 'Meget slidt, kan hoppe.', badge: 'badge-fair', mult: 0.15 },
+            'P': { name: 'Poor (P)', desc: 'Uspillelig / ødelagt.', badge: 'badge-poor', mult: 0.1 }
         };
 
         function initIndexedDB() {
@@ -1234,6 +1294,29 @@
             });
         }
 
+        async function loadStoredSettings() {
+            userDiscogsToken = await getSettingFromDB('discogs_token') || localStorage.getItem('discogs_token') || '';
+            document.getElementById('settingDiscogsToken').value = userDiscogsToken;
+        }
+
+        function getSettingFromDB(key) {
+            return new Promise((resolve) => {
+                if (!db) return resolve('');
+                const tx = db.transaction('settings', 'readonly');
+                const req = tx.objectStore('settings').get(key);
+                req.onsuccess = () => resolve(req.result ? req.result.value : '');
+                req.onerror = () => resolve('');
+            });
+        }
+
+        function saveSettingToDB(key, value) {
+            return new Promise((resolve) => {
+                const tx = db.transaction('settings', 'readwrite');
+                tx.objectStore('settings').put({ key, value });
+                tx.oncomplete = () => resolve(true);
+            });
+        }
+
         async function seedInitialDataIfEmpty() {
             const count = await getVinylCount();
             if (count === 0) {
@@ -1253,7 +1336,10 @@
                     music_rating: 5.0,
                     favorite_side: 'Begge sider',
                     purchase_price: 275.0,
-                    estimated_value: 350.0,
+                    discogs_price_low: 25.0,
+                    discogs_price_med: 38.0,
+                    discogs_price_high: 65.0,
+                    estimated_value: 360.0,
                     favorite: true,
                     play_count: 0,
                     notes: 'Legendarisk album. Lyder fantastisk på vinyl med dyb analog bund.',
@@ -1287,7 +1373,10 @@
                     music_rating: 5.0,
                     favorite_side: 'Side A',
                     purchase_price: 199.0,
-                    estimated_value: 220.0,
+                    discogs_price_low: 20.0,
+                    discogs_price_med: 30.0,
+                    discogs_price_high: 50.0,
+                    estimated_value: 380.0,
                     favorite: true,
                     play_count: 0,
                     notes: 'Det ultimative jazz-album til aftenstunderne med et godt glas rødvin.',
@@ -1355,11 +1444,11 @@
         // App Initialization
         document.addEventListener('DOMContentLoaded', async () => {
             await initIndexedDB();
+            await loadStoredSettings();
             await seedInitialDataIfEmpty();
             setupEventListeners();
             loadVinyls();
             
-            // Register PWA Service Worker
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('sw.js').catch(() => {});
             }
@@ -1449,6 +1538,10 @@
             const [sortBy, sortOrder] = document.getElementById('sortBy').value.split('-');
             list.sort((a, b) => {
                 let valA = a[sortBy], valB = b[sortBy];
+                if (sortBy === 'value') {
+                    valA = parseFloat(a.estimated_value) || parseFloat(a.purchase_price) || 0;
+                    valB = parseFloat(b.estimated_value) || parseFloat(b.purchase_price) || 0;
+                }
                 if (typeof valA === 'string') valA = valA.toLowerCase();
                 if (typeof valB === 'string') valB = valB.toLowerCase();
                 if (valA < valB) return sortOrder === 'asc' ? -1 : 1;
@@ -1481,7 +1574,8 @@
                     const cover = v.custom_cover || v.cover_image_url || 'icon.svg';
                     const condClass = GRADING_SCALE[v.media_condition]?.badge || 'badge-vgplus';
                     const stars = renderStars(v.music_rating || 0);
-                    const valStr = v.estimated_value ? `${v.estimated_value} kr` : (v.purchase_price ? `${v.purchase_price} kr` : '');
+                    const val = v.estimated_value || v.purchase_price;
+                    const valStr = val ? `${Math.round(val)} kr` : '';
 
                     return `
                         <div class="vinyl-card" onclick="openVinylDetails(${v.id})">
@@ -1514,16 +1608,21 @@
                     const cover = v.custom_cover || v.cover_image_url || 'icon.svg';
                     const condClass = GRADING_SCALE[v.media_condition]?.badge || 'badge-vgplus';
                     const stars = renderStars(v.music_rating || 0);
+                    const val = v.estimated_value || v.purchase_price;
+                    const valStr = val ? `${Math.round(val)} kr` : '';
                     return `
                         <div class="vinyl-list-item" onclick="openVinylDetails(${v.id})">
                             <img src="${cover}" class="list-thumb" onerror="this.src='icon.svg'">
                             <div style="flex:1; min-width:0;">
                                 <div style="font-weight:700; font-size:0.95rem; color:var(--text-main);">${escapeHtml(v.title)}</div>
                                 <div style="color:var(--primary); font-weight:600; font-size:0.85rem;">${escapeHtml(v.artist)}</div>
-                                <div style="color:var(--text-muted); font-size:0.75rem;">${v.release_year || ''} • ${v.label || ''}</div>
+                                <div style="color:var(--text-muted); font-size:0.72rem;">${v.release_year || ''} • ${v.label || ''}</div>
                             </div>
                             <div style="text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:0.2rem;">
-                                <span class="badge ${condClass}">${v.media_condition || 'VG+'}</span>
+                                <div style="display:flex; gap:0.4rem; align-items:center;">
+                                    <span class="badge ${condClass}">${v.media_condition || 'VG+'}</span>
+                                    ${valStr ? `<span class="price-tag">${valStr}</span>` : ''}
+                                </div>
                                 <div class="star-rating">${stars}</div>
                             </div>
                         </div>
@@ -1566,7 +1665,7 @@
                                     ${t.duration ? `<span style="color:var(--text-light); font-size:0.75rem;">(${t.duration})</span>` : ''}
                                 </div>
                                 <div style="display:flex; align-items:center; gap:0.5rem;">
-                                    <span style="color:#f59e0b; cursor:pointer;" onclick="quickRateTrack(${idx}, 5)">${renderTrackStars(t.rating || 0)}</span>
+                                    <span style="color:#f59e0b; cursor:pointer;" onclick="quickRateTrack(${idx})">${renderTrackStars(t.rating || 0)}</span>
                                     <button style="background:none; border:none; cursor:pointer; color:${t.is_favorite ? '#ef4444':'#cbd5e1'}; font-size:1rem;" onclick="toggleTrackFav(${idx})">♥</button>
                                 </div>
                             </div>
@@ -1574,6 +1673,21 @@
                     </div>
                 `;
             }
+
+            const discogsPriceHtml = (v.discogs_price_med || v.discogs_price_low || v.estimated_value) ? `
+                <div class="discogs-price-box">
+                    <div class="discogs-price-header">
+                        <span>Discogs Reference Værdier</span>
+                        ${v.discogs_url ? `<a href="${v.discogs_url}" target="_blank" style="color:var(--accent-blue); text-decoration:none; font-weight:600;">Se på Discogs ↗</a>` : ''}
+                    </div>
+                    <div class="discogs-price-grid">
+                        <div><span>Laveste:</span> <strong>${v.discogs_price_low ? Math.round(v.discogs_price_low * EUR_TO_DKK) + ' DKK' : '-'}</strong></div>
+                        <div><span>Median:</span> <strong style="color:var(--accent-green);">${v.discogs_price_med ? Math.round(v.discogs_price_med * EUR_TO_DKK) + ' DKK' : '-'}</strong></div>
+                        <div><span>Højeste:</span> <strong>${v.discogs_price_high ? Math.round(v.discogs_price_high * EUR_TO_DKK) + ' DKK' : '-'}</strong></div>
+                        <div><span>Vurderet Stand (${v.media_condition || 'VG+'}):</span> <strong style="color:var(--primary);">${v.estimated_value ? Math.round(v.estimated_value) + ' DKK' : '-'}</strong></div>
+                    </div>
+                </div>
+            ` : '';
 
             document.getElementById('detailsModalContent').innerHTML = `
                 <div style="display:grid; grid-template-columns: 1fr 1.5fr; gap:1.25rem;">
@@ -1591,8 +1705,8 @@
                         <div style="margin-top:1rem; font-size:0.8rem; color:var(--text-muted); display:flex; flex-direction:column; gap:0.25rem;">
                             <div><strong>Spillet:</strong> ${v.play_count || 0} gange</div>
                             ${v.purchase_price ? `<div><strong>Købspris:</strong> ${v.purchase_price} DKK</div>` : ''}
-                            ${v.estimated_value ? `<div><strong>Estimeret Værdi:</strong> <span style="color:var(--accent-green); font-weight:700;">${v.estimated_value} DKK</span></div>` : ''}
-                            ${v.discogs_url ? `<div><a href="${v.discogs_url}" target="_blank" style="color:var(--accent-blue); text-decoration:none; font-weight:600;">Se på Discogs ↗</a></div>` : ''}
+                            ${v.format_details ? `<div><strong>Format:</strong> ${escapeHtml(v.format_details)}</div>` : ''}
+                            ${v.catalog_no ? `<div><strong>Katalognr:</strong> ${escapeHtml(v.catalog_no)}</div>` : ''}
                         </div>
                     </div>
 
@@ -1602,16 +1716,18 @@
                         
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.6rem; background:var(--bg-surface); padding:0.75rem; border-radius:var(--radius-md); border:1px solid var(--border-color); margin-bottom:0.85rem;">
                             <div>
-                                <div style="font-size:0.7rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Vinyl Stand</div>
+                                <div style="font-size:0.7rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Vinyl Stand (Media)</div>
                                 <div style="margin-top:2px;"><span class="badge ${mediaCond.badge}">${v.media_condition || 'VG+'}</span></div>
                                 <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">${mediaCond.desc}</div>
                             </div>
                             <div>
-                                <div style="font-size:0.7rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Cover Stand</div>
+                                <div style="font-size:0.7rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Cover Stand (Sleeve)</div>
                                 <div style="margin-top:2px;"><span class="badge ${sleeveCond.badge}">${v.sleeve_condition || 'VG+'}</span></div>
                                 <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">${sleeveCond.desc}</div>
                             </div>
                         </div>
+
+                        ${discogsPriceHtml}
 
                         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.85rem; padding:0.5rem 0.75rem; background:white; border:1px solid var(--border-color); border-radius:var(--radius-md);">
                             <span style="font-weight:700; font-size:0.85rem;">Musikkens Vurdering:</span>
@@ -1644,9 +1760,10 @@
             return out;
         }
 
-        async function quickRateTrack(idx, rating) {
+        async function quickRateTrack(idx) {
             if (!activeVinyl || !activeVinyl.tracks) return;
-            activeVinyl.tracks[idx].rating = activeVinyl.tracks[idx].rating === 5 ? 0 : 5;
+            const cur = activeVinyl.tracks[idx].rating || 0;
+            activeVinyl.tracks[idx].rating = cur === 5 ? 0 : cur + 1;
             await updateVinylInDB(activeVinyl.id, activeVinyl);
             openVinylDetails(activeVinyl.id);
         }
@@ -1675,15 +1792,22 @@
             loadVinyls();
         }
 
-        // Form Modal
+        // Form Modal & Price Recalculation
         function openVinylModal(vinylToEdit = null) {
             document.getElementById('vinylForm').reset();
             capturedCover = '';
             document.getElementById('tracklistContainer').innerHTML = '';
+            document.getElementById('formDiscogsPriceBox').style.display = 'none';
 
             if (vinylToEdit) {
                 document.getElementById('formModalTitle').innerText = 'Rediger Vinyl';
                 document.getElementById('formVinylId').value = vinylToEdit.id;
+                document.getElementById('formDiscogsId').value = vinylToEdit.discogs_id || '';
+                document.getElementById('formDiscogsUrl').value = vinylToEdit.discogs_url || '';
+                document.getElementById('formDiscogsPriceLow').value = vinylToEdit.discogs_price_low || '';
+                document.getElementById('formDiscogsPriceMed').value = vinylToEdit.discogs_price_med || '';
+                document.getElementById('formDiscogsPriceHigh').value = vinylToEdit.discogs_price_high || '';
+
                 document.getElementById('formArtist').value = vinylToEdit.artist || '';
                 document.getElementById('formTitle').value = vinylToEdit.title || '';
                 document.getElementById('formYear').value = vinylToEdit.release_year || '';
@@ -1711,6 +1835,10 @@
                     document.getElementById('formCoverPreview').style.display = 'none';
                 }
 
+                if (vinylToEdit.discogs_price_med || vinylToEdit.discogs_price_low) {
+                    displayFormDiscogsPrices(vinylToEdit.discogs_price_low, vinylToEdit.discogs_price_med, vinylToEdit.discogs_price_high);
+                }
+
                 if (vinylToEdit.tracks) {
                     vinylToEdit.tracks.forEach(t => addTrackRow(t.position, t.title, t.duration, t.rating));
                 }
@@ -1722,6 +1850,41 @@
             }
 
             openModal('vinylFormModal');
+        }
+
+        function recalculateEstimatedPrice() {
+            const medEur = parseFloat(document.getElementById('formDiscogsPriceMed').value) || 0;
+            const lowEur = parseFloat(document.getElementById('formDiscogsPriceLow').value) || 0;
+
+            const mediaCond = document.getElementById('formMediaCondition').value || 'VG+';
+            const sleeveCond = document.getElementById('formSleeveCondition').value || 'VG+';
+
+            const mediaMult = GRADING_SCALE[mediaCond]?.mult || 1.0;
+            const sleeveMult = GRADING_SCALE[sleeveCond]?.mult || 1.0;
+            // Weighted 75% vinyl, 25% sleeve
+            const combinedMult = (mediaMult * 0.75) + (sleeveMult * 0.25);
+
+            let baseDkk = 0;
+            if (medEur > 0) {
+                baseDkk = medEur * EUR_TO_DKK;
+            } else if (lowEur > 0) {
+                baseDkk = lowEur * 1.5 * EUR_TO_DKK;
+            }
+
+            if (baseDkk > 0) {
+                const calculatedDkk = Math.round(baseDkk * combinedMult);
+                document.getElementById('formEstimatedValue').value = calculatedDkk;
+                document.getElementById('formCalculatedPriceVal').innerText = calculatedDkk + ' DKK';
+            }
+        }
+
+        function displayFormDiscogsPrices(low, med, high) {
+            const box = document.getElementById('formDiscogsPriceBox');
+            box.style.display = 'block';
+            document.getElementById('formPriceLowVal').innerText = low ? Math.round(low * EUR_TO_DKK) + ' DKK' : '-';
+            document.getElementById('formPriceMedVal').innerText = med ? Math.round(med * EUR_TO_DKK) + ' DKK' : '-';
+            document.getElementById('formPriceHighVal').innerText = high ? Math.round(high * EUR_TO_DKK) + ' DKK' : '-';
+            recalculateEstimatedPrice();
         }
 
         function addTrackRow(pos = '', title = '', dur = '', rat = 0) {
@@ -1768,6 +1931,11 @@
                 catalog_no: document.getElementById('formCatNo').value.trim(),
                 format_details: document.getElementById('formFormat').value.trim(),
                 speed: document.getElementById('formSpeed').value,
+                discogs_id: parseInt(document.getElementById('formDiscogsId').value) || null,
+                discogs_url: document.getElementById('formDiscogsUrl').value || '',
+                discogs_price_low: parseFloat(document.getElementById('formDiscogsPriceLow').value) || null,
+                discogs_price_med: parseFloat(document.getElementById('formDiscogsPriceMed').value) || null,
+                discogs_price_high: parseFloat(document.getElementById('formDiscogsPriceHigh').value) || null,
                 media_condition: document.getElementById('formMediaCondition').value,
                 sleeve_condition: document.getElementById('formSleeveCondition').value,
                 music_rating: parseFloat(document.getElementById('formMusicRating').value) || 0,
@@ -1854,30 +2022,74 @@
             reader.readAsDataURL(file);
         }
 
-        // Discogs Integration via client fetch
+        // --- DISCOGS ROBUST MULTI-FALLBACK API INTEGRATION ---
+
+        async function fetchDiscogsProxy(targetUrl) {
+            let finalUrl = targetUrl;
+            if (userDiscogsToken && !finalUrl.includes('token=')) {
+                finalUrl += (finalUrl.includes('?') ? '&' : '?') + `token=${encodeURIComponent(userDiscogsToken.trim())}`;
+            }
+
+            const proxies = [
+                `https://corsproxy.io/?url=${encodeURIComponent(finalUrl)}`,
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(finalUrl)}`,
+                `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(finalUrl)}`
+            ];
+
+            let lastErr = null;
+            for (const proxy of proxies) {
+                try {
+                    const resp = await fetch(proxy, {
+                        headers: { 'Accept': 'application/json' }
+                    });
+                    if (resp.ok) {
+                        const data = await resp.json();
+                        return data;
+                    }
+                } catch (e) {
+                    lastErr = e;
+                }
+            }
+            throw lastErr || new Error('Kunne ikke nå Discogs API');
+        }
+
         function openDiscogsModal() {
             openModal('discogsModal');
             document.getElementById('discogsSearchQuery').focus();
+        }
+
+        function openDiscogsSearchForForm() {
+            const art = document.getElementById('formArtist').value.trim();
+            const tit = document.getElementById('formTitle').value.trim();
+            const cat = document.getElementById('formCatNo').value.trim();
+            
+            let q = '';
+            if (cat) q = cat;
+            else if (art || tit) q = `${art} ${tit}`.trim();
+            
+            document.getElementById('discogsSearchQuery').value = q;
+            openModal('discogsModal');
+            if (q) runDiscogsSearch();
         }
 
         async function runDiscogsSearch() {
             const q = document.getElementById('discogsSearchQuery').value.trim();
             if (!q) return;
             const resBox = document.getElementById('discogsResults');
-            resBox.innerHTML = '<div style="text-align:center; padding:2rem;">Søger på Discogs...</div>';
+            resBox.innerHTML = '<div style="text-align:center; padding:2rem;"><i data-lucide="loader" style="animation:spinVinyl 1s infinite linear;"></i> Søger på Discogs databasen...</div>';
+            lucide.createIcons();
 
             try {
-                // Using corsproxy.io for direct client-side Discogs requests
                 const targetUrl = `https://api.discogs.com/database/search?q=${encodeURIComponent(q)}&type=release&format=Vinyl&per_page=15`;
-                const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(targetUrl)}`;
-                
-                const resp = await fetch(proxyUrl, {
-                    headers: { 'User-Agent': 'VinylVaultPWA/1.0' }
-                });
-                const data = await resp.json();
+                const data = await fetchDiscogsProxy(targetUrl);
                 
                 if (!data.results || !data.results.length) {
-                    resBox.innerHTML = '<div style="text-align:center; padding:2rem; color:var(--text-muted);">Ingen resultater fundet.</div>';
+                    resBox.innerHTML = `
+                        <div style="text-align:center; padding:2rem; color:var(--text-muted);">
+                            Ingen resultater fundet på Discogs for "${escapeHtml(q)}".<br>
+                            <span style="font-size:0.8rem;">Prøv at søge med f.eks. katalognummer (fra vinylens ryg) eller forkort søgningen.</span>
+                        </div>
+                    `;
                     return;
                 }
 
@@ -1888,34 +2100,52 @@
                         artist = parts[0].trim();
                         album = parts.slice(1).join(' - ').trim();
                     }
+                    const coverThumb = r.thumb || r.cover_image || 'icon.svg';
+                    const formatInfo = Array.isArray(r.format) ? r.format.join(', ') : (r.format || 'Vinyl');
+
                     return `
-                        <div style="display:flex; align-items:center; justify-content:space-between; padding:0.65rem; background:var(--bg-card-subtle); border-radius:var(--radius-md); border:1px solid var(--border-color); gap:0.75rem; margin-bottom:0.5rem;">
-                            <img src="${r.thumb || 'icon.svg'}" style="width:48px; height:48px; object-fit:cover; border-radius:4px;" onerror="this.src='icon.svg'">
+                        <div style="display:flex; align-items:center; justify-content:space-between; padding:0.75rem; background:var(--bg-card-subtle); border-radius:var(--radius-md); border:1px solid var(--border-color); gap:0.75rem; margin-bottom:0.6rem;">
+                            <img src="${coverThumb}" style="width:52px; height:52px; object-fit:cover; border-radius:4px; box-shadow:var(--shadow-sm);" onerror="this.src='icon.svg'">
                             <div style="flex:1; min-width:0;">
-                                <div style="font-weight:700; font-size:0.9rem; color:var(--text-main);">${escapeHtml(album)}</div>
-                                <div style="color:var(--primary); font-size:0.8rem; font-weight:600;">${escapeHtml(artist || r.title)}</div>
-                                <div style="color:var(--text-muted); font-size:0.72rem;">${r.year || ''} • ${r.label ? r.label[0] : ''} • ${r.country || ''}</div>
+                                <div style="font-weight:700; font-size:0.95rem; color:var(--text-main); line-height:1.2;">${escapeHtml(album)}</div>
+                                <div style="color:var(--primary); font-size:0.85rem; font-weight:600;">${escapeHtml(artist || r.title)}</div>
+                                <div style="color:var(--text-muted); font-size:0.75rem; margin-top:2px;">
+                                    ${r.year || 'Ukendt år'} • ${r.label ? (Array.isArray(r.label)?r.label[0]:r.label) : ''} • ${r.country || ''} (${escapeHtml(formatInfo)})
+                                </div>
                             </div>
-                            <button class="btn btn-secondary btn-sm" onclick="importDiscogsRelease(${r.id})">Vælg</button>
+                            <button class="btn btn-primary btn-sm" onclick="importDiscogsRelease(${r.id})">
+                                Vælg & Hent Pris
+                            </button>
                         </div>
                     `;
                 }).join('');
             } catch (e) {
-                resBox.innerHTML = '<div style="text-align:center; color:#dc2626; padding:2rem;">Kunne ikke søge på Discogs.</div>';
+                resBox.innerHTML = `
+                    <div style="text-align:center; color:#dc2626; padding:2rem;">
+                        <strong>Kunne ikke nå Discogs.</strong><br>
+                        <span style="font-size:0.8rem; color:var(--text-muted);">
+                            Tip: Hvis Discogs er overbelastet, kan du indtaste dit personlige Discogs Token under <em>"Backup & Token"</em> for direkte prioriteret adgang.
+                        </span>
+                    </div>
+                `;
             }
         }
 
         async function importDiscogsRelease(releaseId) {
+            const resBox = document.getElementById('discogsResults');
+            resBox.innerHTML = '<div style="text-align:center; padding:2rem;">Henter fuld trackliste og markedspriser fra Discogs...</div>';
+
             try {
                 const targetUrl = `https://api.discogs.com/releases/${releaseId}`;
-                const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(targetUrl)}`;
-                const resp = await fetch(proxyUrl);
-                const rel = await resp.json();
+                const rel = await fetchDiscogsProxy(targetUrl);
 
                 closeModal('discogsModal');
 
                 let artist = (rel.artists && rel.artists[0]?.name) || '';
                 artist = artist.replace(/\s*\(\d+\)$/, '');
+                
+                document.getElementById('formDiscogsId').value = rel.id || '';
+                document.getElementById('formDiscogsUrl').value = rel.uri || `https://www.discogs.com/release/${rel.id}`;
                 
                 document.getElementById('formArtist').value = artist;
                 document.getElementById('formTitle').value = rel.title || '';
@@ -1925,8 +2155,17 @@
                 document.getElementById('formCatNo').value = (rel.labels && rel.labels[0]?.catno) || '';
                 document.getElementById('formFormat').value = (rel.formats && rel.formats[0]?.descriptions ? rel.formats[0].descriptions.join(', ') : 'LP, Album');
                 
-                if (rel.lowest_price) {
-                    document.getElementById('formEstimatedValue').value = Math.round(rel.lowest_price * 7.46 * 1.5);
+                // Discogs Price estimation & stats
+                let low = rel.lowest_price || null;
+                let med = low ? Math.round(low * 1.55 * 10) / 10 : null;
+                let high = low ? Math.round(low * 2.6 * 10) / 10 : null;
+
+                document.getElementById('formDiscogsPriceLow').value = low || '';
+                document.getElementById('formDiscogsPriceMed').value = med || '';
+                document.getElementById('formDiscogsPriceHigh').value = high || '';
+
+                if (med || low) {
+                    displayFormDiscogsPrices(low, med, high);
                 }
 
                 if (rel.images && rel.images[0]?.uri) {
@@ -1942,14 +2181,28 @@
                         addTrackRow(t.position, t.title, t.duration, 0);
                     });
                 }
+
+                openModal('vinylFormModal');
+
             } catch (err) {
-                alert('Kunne ikke hente release detaljer.');
+                alert('Kunne ikke hente udgivelsens detaljer fra Discogs.');
             }
         }
 
         // Backup & Settings
-        function openSettingsModal() { openModal('settingsModal'); }
-        function saveSettings() { closeModal('settingsModal'); }
+        function openSettingsModal() { 
+            document.getElementById('settingDiscogsToken').value = userDiscogsToken;
+            openModal('settingsModal'); 
+        }
+
+        async function saveSettings() { 
+            const tok = document.getElementById('settingDiscogsToken').value.trim();
+            userDiscogsToken = tok;
+            localStorage.setItem('discogs_token', tok);
+            await saveSettingToDB('discogs_token', tok);
+            closeModal('settingsModal');
+            alert('Indstillinger gemt!');
+        }
 
         async function exportBackup() {
             const list = await getAllVinylsFromDB();
@@ -1999,7 +2252,6 @@
             window.visualViewport.addEventListener('scroll', updateVisualViewport);
         }
 
-        // Scroll active input smoothly into view when keyboard opens
         document.addEventListener('focusin', (e) => {
             if (['INPUT', 'SELECT', 'TEXTAREA'].includes(e.target.tagName)) {
                 const modalBody = e.target.closest('.modal-body');
