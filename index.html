@@ -1258,7 +1258,8 @@
         let currentView = 'grid';
         let mediaStream = null;
         let capturedCover = '';
-        let userDiscogsToken = '';
+        const DEFAULT_DISCOGS_TOKEN = 'XBSDPpWpyZiSUmOInGQtwFRZvoGKmmVWxlTPlwZP';
+        let userDiscogsToken = DEFAULT_DISCOGS_TOKEN;
         const EUR_TO_DKK = 7.46;
 
         // Goldmine Grading Scale Definition & Market Multipliers
@@ -1295,7 +1296,7 @@
         }
 
         async function loadStoredSettings() {
-            userDiscogsToken = await getSettingFromDB('discogs_token') || localStorage.getItem('discogs_token') || '';
+            userDiscogsToken = await getSettingFromDB('discogs_token') || localStorage.getItem('discogs_token') || DEFAULT_DISCOGS_TOKEN;
             document.getElementById('settingDiscogsToken').value = userDiscogsToken;
         }
 
