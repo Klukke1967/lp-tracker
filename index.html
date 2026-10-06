@@ -676,6 +676,30 @@
             font-size: 0.85rem;
         }
 
+        .vinyl-details-layout {
+            display: grid;
+            grid-template-columns: minmax(280px, 1fr) minmax(0, 1.5fr);
+            gap: 1.25rem;
+            align-items: start;
+        }
+
+        .vinyl-details-cover {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 0.75rem;
+        }
+
+        .vinyl-details-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
         .discogs-price-item {
             background: rgba(255, 255, 255, 0.8);
             padding: 0.4rem 0.6rem;
@@ -793,6 +817,25 @@
             }
 
             .modal-footer .btn { flex: 1; justify-content: center; }
+
+            .vinyl-details-layout {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .vinyl-details-cover {
+                max-width: 100%;
+            }
+
+            .discogs-price-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .discogs-price-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.25rem;
+            }
 
             .track-row {
                 display: flex;
@@ -1897,10 +1940,10 @@
             ` : '';
 
             document.getElementById('detailsModalContent').innerHTML = `
-                <div style="display:grid; grid-template-columns: 1fr 1.5fr; gap:1.25rem;">
+                <div class="vinyl-details-layout">
                     <div>
-                        <div style="position:relative; width:100%; aspect-ratio:1/1; border-radius:var(--radius-md); overflow:hidden; box-shadow:var(--shadow-md); margin-bottom:0.75rem;">
-                            <img src="${cover}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='icon.svg'">
+                        <div class="vinyl-details-cover">
+                            <img src="${cover}" onerror="this.src='icon.svg'">
                         </div>
                         <button class="btn btn-primary" style="width:100%; margin-bottom:0.5rem;" onclick="playVinyl('${v.id}')">
                             <i data-lucide="disc"></i> Sæt på pladespilleren
