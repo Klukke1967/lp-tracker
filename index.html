@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#0d9488">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="VinylVault">
@@ -849,6 +852,60 @@
             .track-row .track-rating { width: 75px; flex-shrink: 0; }
             .track-row button { width: 36px; flex-shrink: 0; }
         }
+
+        /* Automatisk Opdaterings-Toast */
+        .update-toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(140px);
+            background: #0f172a;
+            border: 1.5px solid #2dd4bf;
+            box-shadow: 0 10px 40px rgba(13, 148, 136, 0.4);
+            border-radius: 9999px;
+            padding: 8px 14px 8px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 9999;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .update-toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .toast-content {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .toast-text {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #ffffff;
+            white-space: nowrap;
+        }
+        .btn-toast-reload {
+            background: #2dd4bf;
+            color: #0f172a;
+            border: none;
+            font-family: inherit;
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 7px 14px;
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .btn-toast-reload:hover {
+            background: #ffffff;
+            box-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
+        }
+
     </style>
 </head>
 <body>
@@ -871,6 +928,9 @@
             </a>
 
             <div class="nav-actions">
+                <button class="btn btn-secondary btn-icon-only" id="btnForceRefresh" title="Tving opdatering af appen" aria-label="Opdater app" style="border-radius: 50%; width: 38px; height: 38px; padding: 0; display: inline-flex; align-items: center; justify-content: center;">
+                    <i data-lucide="refresh-cw" style="width: 17px; height: 17px;"></i>
+                </button>
                 <button class="btn btn-secondary" id="btnSettings" title="Backup og Discogs API Token">
                     <i data-lucide="settings"></i> Backup & Token
                 </button>
@@ -1697,9 +1757,52 @@
 
             setupEventListeners();
             
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('sw.js').catch(() => {});
+            // Service Worker Registration & Version Check
+            checkForAppUpdates();
+
+            const btnRefresh = document.getElementById('btnForceRefresh');
+            if (btnRefresh) {
+                btnRefresh.addEventListener('click', () => {
+                    btnRefresh.style.transform = 'rotate(360deg)';
+                    btnRefresh.style.transition = 'transform 0.3s ease';
+                    setTimeout(() => {
+                        forceAppReload();
+                    }, 200);
+                });
             }
+
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => {
+                        reg.update();
+                        reg.addEventListener('updatefound', () => {
+                            const newWorker = reg.installing;
+                            if (newWorker) {
+                                newWorker.addEventListener('statechange', () => {
+                                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                        checkForAppUpdates();
+                                    }
+                                });
+                            }
+                        });
+                    })
+                    .catch(() => {});
+            }
+
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    checkForAppUpdates();
+                    if ('serviceWorker' in navigator) {
+                        navigator.serviceWorker.getRegistrations().then(regs => {
+                            for (let reg of regs) reg.update();
+                        });
+                    }
+                }
+            });
+
+            window.addEventListener('focus', () => {
+                checkForAppUpdates();
+            });
         });
 
         function setupEventListeners() {
@@ -2605,6 +2708,65 @@
             if (!str) return '';
             return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
+
+        // Automatisk Versionstjek & Cache-busting
+        async function checkForAppUpdates() {
+            try {
+                const res = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });
+                if (!res.ok) return;
+                const serverVer = await res.json();
+                const storedBuild = localStorage.getItem('vinyl_vault_current_build');
+
+                if (!storedBuild) {
+                    localStorage.setItem('vinyl_vault_current_build', serverVer.buildTime);
+                    return;
+                }
+
+                if (serverVer.buildTime > parseInt(storedBuild, 10)) {
+                    showUpdateToast(serverVer);
+                }
+            } catch (e) {
+                console.debug('Update check skipped:', e);
+            }
+        }
+
+        function showUpdateToast(serverVer) {
+            const toast = document.getElementById('update-toast');
+            const btn = document.getElementById('btn-toast-reload');
+            if (!toast) return;
+
+            toast.classList.add('show');
+
+            if (btn) {
+                btn.onclick = () => {
+                    forceAppReload(serverVer.buildTime);
+                };
+            }
+        }
+
+        function forceAppReload(newBuildTime) {
+            if (newBuildTime) {
+                localStorage.setItem('vinyl_vault_current_build', newBuildTime);
+            }
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(regs => {
+                    for (let reg of regs) reg.update();
+                });
+            }
+            const url = new URL(window.location.href);
+            url.searchParams.set('v', Date.now());
+            window.location.href = url.toString();
+        }
+
     </script>
+    <!-- Automatisk Opdaterings-Toast -->
+    <div id="update-toast" class="update-toast">
+        <div class="toast-content">
+            <span style="font-size: 16px;">🎵</span>
+            <span class="toast-text">Ny opdatering til Vinyl Vault!</span>
+        </div>
+        <button id="btn-toast-reload" class="btn-toast-reload">Opdater nu</button>
+    </div>
+
 </body>
 </html>
